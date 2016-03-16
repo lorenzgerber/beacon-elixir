@@ -11,8 +11,8 @@ If you want to tune the configuration or load custom data, please, skip this sec
 
 * Create 2 databases and a new user (use *r783qjkldDsiu* as password)
 ```
-createdb elixir_beacon_dev -h 127.0.0.1 -p 5432 -U postgres
-createdb elixir_beacon_testing -h 127.0.0.1 -p 5432 -U postgres
+createdb elixir_beacon_dev -U postgres
+createdb elixir_beacon_testing -U postgres
 createuser -P microaccounts_dev
 psql elixir_beacon_dev -U postgres
 ```
@@ -22,19 +22,21 @@ GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;
 ```
 * Load the schema (download [elixir_beacon_db_schema.sql](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql))
 ```
-psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
-psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U elixir_beacon_testing < elixir_beacon_db_schema.sql
+wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql
+psql -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
+psql -d elixir_beacon_dev -U elixir_beacon_testing < elixir_beacon_db_schema.sql
 ```
 * Load data (download [EGAD00000000028.SNPs](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/EGAD00000000028.SNPs))
 ```
-psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U microaccounts_dev
+psql -d elixir_beacon_dev -U microaccounts_dev
 ```
 ```sql
 INSERT INTO beacon_dataset(id, description, access_type, reference_genome, size)
   VALUES ('EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 34114);
 ```
 ```
-cat EGAD00000000028.SNPs | psql -h 127.0.0.1 -p 5432 -U microaccounts_dev -c "COPY beacon_data_table(dataset_id,chromosome,position,alternate) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev
+wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/EGAD00000000028.SNPs
+cat EGAD00000000028.SNPs | psql -U microaccounts_dev -c "COPY beacon_data_table(dataset_id,chromosome,position,alternate) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev
 ```
 * Download the code
 ```
@@ -66,13 +68,19 @@ java -jar elixir-beacon-0.3.jar --spring.profiles.active=dev
 createdb elixir_beacon_dev -h 127.0.0.1 -p 5432 -U postgres
 createdb elixir_beacon_testing -h 127.0.0.1 -p 5432 -U postgres
 ```
-NOTE: If you want to use a different name, user or your Postgres server is listening to a different port, please, replace the values in the prevoius command.
+NOTE: If you want to use a different name, user or your Postgres server is running in a different host or is listening to a different port, please, replace the values in the previous command.
+
+* These are the most common options used in the commands of this section:
+  * <code>-d</code> database name (depending on the command the database name will be specified with this option).
+  * <code>-h</code> hostname or IP of the machine where the Postgres server is running.
+  * <code>-p</code> port that the Postgres server is listening to.
+  * <code>-U</code> user name that will be used to connect to the database. Depending on the command it might be required to be a superuser (i. e. postgres).
 
 * Create a user that will be used by the application to connect to the databases just created:
 ```
 createuser -P microaccounts_dev
 ```
-This command will propt for the password of the new user.
+This command will prompt for the password of the new user.
 
 * Log in each of the databases and grant privileges to a normal user (that is, not a super user), i. e. the user just created in the previous step:
 ```
@@ -85,8 +93,9 @@ GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;
 
 NOTE: You can skip this step and load the schema using a super user in the next step and after that, granting privileges to a normal user (this user will be used by the application to connect to the database).
 
-* Download the schema script from [here](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql) and run it in **both** databases: 
+* Download the schema [script](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql) and run it in **both** databases: 
 ```
+wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql
 psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
 psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U elixir_beacon_testing < elixir_beacon_db_schema.sql
 ```
@@ -103,15 +112,16 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO microaccounts_dev;
 Remember to run these lines in both databases.
 
 ##Load the data
-* Download the script to parse VCF files [here](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh) and give it executable rights:
+* Download the [script](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
 ```
+wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh
 chmod +x vcf_parser.sh
 ```
 * Run this script executing:
 ```
 ./vcf_parser.sh dataset_id < file.vcf
 ```
-This script will generate an output file called dataset_id.SNPs.
+This script will generate an output file called dataset_id.SNPs (i. e. EGAD00000000028.SNPs).
 It will also output the number of variants extracted from the VCF. This value is the "size" in the next step.
 
 * Load the dataset information into **beacon_dataset_table**.
@@ -149,23 +159,6 @@ mvn install
 Now this dependency will be found when compiling the main project, elixir_beacon.
 
 ##Elixir Beacon, the main project
-###Project structure
-The project has the following structure:
-* /src/main/java
-    * Java files (.java).
-* /src/main/resources
-    * configuration files: .properies, .yml
-* /src/test/java
-    * Java classes for testing.
-* /src/test/resources
-    * configuration files for testing: .properties, .yml
-* /target/generated-sources/java
-    * auto generated Java files.
-* /target/classes
-    * compiled files (.class).
-* /target
-    * among other things, contains the .jar file with the compiled classes, libraries, etc.
-
 ###Configuration files
 The key files are **/src/main/resources/application-{profile}.properties** and **/src/test/resources/application-{profile}.properties** (see [Deploy JAR](https://github.com/sdelatorrep/elixir_beacon/blob/master/README.md#deploy-the-jar) for more information about profiles).
 
@@ -282,7 +275,6 @@ Returns the information about this beacon: its Id, name and description, the API
     "description" : "Low-coverage whole genome sequencing; variant calling, genotype calling and phasing",
     "assemblyId" : "grch37",
     "dataUseConditions" : [ {
-      "@class" : "org.ega_archive.elixirbeacon.dto.ConsentCodeDataUseProfile",
       "header" : {
         "name" : "Consent Code",
         "version" : "0.1",
@@ -314,7 +306,6 @@ Returns the information about this beacon: its Id, name and description, the API
         } ]
       }
     }, {
-      "@class" : "org.ega_archive.elixirbeacon.dto.AdamDataUseProfile",
       "header" : {
         "name" : "ADA-M",
         "version" : "0.2",
@@ -368,7 +359,29 @@ Returns the information about this beacon: its Id, name and description, the API
   }
 }
 ```
-The 3 examples that appear in field sampleAlleleRequests can be customized by modifying **application-{profile}.yml** as explained in [Configure application](https://github.com/sdelatorrep/elixir_beacon/blob/master/README.md#configure-application).
+The 3 examples that appear in field **sampleAlleleRequests** can be customized by modifying the following properties in **/src/main/resources/application-{profile}.yml**:
+```yml
+#properties
+#sample #1
+querySamples:
+  assembly-id-1: GRCh37
+  position-1: 6689
+  reference-name-1: 17
+  alternate-bases-1: 
+  dataset-ids-1: 
+#sample #2
+  assembly-id-2: GRCh37
+  position-2: 1040026
+  reference-name-2: 1
+  alternate-bases-2: 
+  dataset-ids-2: EGAD00001000740,EGAD00001000741
+#sample #3
+  assembly-id-3: GRCh37
+  position-3: 1040026
+  reference-name-3: 1
+  alternate-bases-3: C
+  dataset-ids-3: EGAD00001000740
+```
 
 ##/beacon/query
 To actually ask the beacon for questions like "do you have any genomes with an 'A' at position 100,735 on chromosome 3?" And the answer will be yes or no.
@@ -433,7 +446,25 @@ Or you can ask for the same information in an specific dataset:
 }
 ```
 
-#Extend/Change functionality
+#Further information
+##Project structure
+The project has the following structure:
+* /src/main/java
+    * Java files (.java).
+* /src/main/resources
+    * configuration files: .properies, .yml
+* /src/test/java
+    * Java classes for testing.
+* /src/test/resources
+    * configuration files for testing: .properties, .yml
+* /target/generated-sources/java
+    * auto generated Java files.
+* /target/classes
+    * compiled files (.class).
+* /target
+    * among other things, contains the .jar file with the compiled classes, libraries, etc.
+
+##Extend/Change functionality
 You have two options:
 
 1. Editing the source code.
