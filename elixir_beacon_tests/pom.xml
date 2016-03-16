@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>eu.crg.ega</groupId>
+    <artifactId>elixir-beacon-service-tests</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Elixir Beacon Jmeter Tests</name>
+    <description>Service</description>
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <m.host>localhost</m.host>
+                <m.port>9075</m.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>app</id>
+            <properties>
+                <m.host>app01</m.host>
+                <m.port>9075</m.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>apptest</id>
+            <properties>
+                <m.host>apptest01</m.host>
+                <m.port>9075</m.port>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.lazerycode.jmeter</groupId>
+                <artifactId>jmeter-maven-plugin</artifactId>
+                <version>1.10.1</version>
+                <configuration>
+                    <propertiesUser>
+                        <microservices.host>${m.host}</microservices.host>
+                        <microservices.port>${m.port}</microservices.port>
+                    </propertiesUser>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>kg.apc</groupId>
+                        <artifactId>jmeter-plugins-extras-libs</artifactId>
+                        <version>1.3.1</version>
+                    </dependency>
+                    <!-- Add extra dependencies json path extractor-->
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>jmeter-tests</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jmeter</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

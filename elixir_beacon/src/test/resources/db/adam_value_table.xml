@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <adam_value_table id="1" value="NOT SPECIFIED" />
+    <adam_value_table id="2" value="UNTRUE" />
+    <adam_value_table id="3" value="TRUE" />
+</dataset>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <consent_code_table id="1" name="No restrictions" abbr="NRES" description="No restrictions on data use." category_id="1"/>
+    <consent_code_table id="2" name="General research use and clinical care" abbr="GRU" description="For health/medical/biomedical purposes, including the study of population origins or ancestry." category_id="1"/>
+    <consent_code_table id="3" name="Oher research-specific restrictions" abbr="RS" description="Use of the data is limited to studies of [research type] (e.g., pediatric research)." category_id="2"/>
+    <consent_code_table id="4" name="Research use only" abbr="RUO" description="Use of data is limited to research purposes (e.g., does not include its use in clinical care)." category_id="2"/>
+    <consent_code_table id="5" name="Project-specific restrictions" abbr="PS" description="Use of data is limited to use within an approved project." category_id="3"/>
+    <consent_code_table id="6" name="Institution-specific restrictions" abbr="IS" description="Use of data is limited to use within an approved institution." category_id="3"/>
+</dataset>

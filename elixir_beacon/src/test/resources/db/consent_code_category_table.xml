@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <consent_code_category_table id="1" name="PRIMARY" />
+    <consent_code_category_table id="2" name="SECONDARY" />
+    <consent_code_category_table id="3" name="REQUIREMENT" />
+</dataset>

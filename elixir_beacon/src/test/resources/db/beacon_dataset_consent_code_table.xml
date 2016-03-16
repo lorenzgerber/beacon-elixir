@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000001" consent_code_id="1" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000001" consent_code_id="4" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000002" consent_code_id="1" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000002" consent_code_id="3" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000002" consent_code_id="5" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000003" consent_code_id="2" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000004" consent_code_id="2" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000004" consent_code_id="3" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000004" consent_code_id="4" />
+    <beacon_dataset_consent_code_table dataset_id="EGAD00000000004" consent_code_id="5" />
+	<beacon_dataset_consent_code_table dataset_id="EGAD00000000004" consent_code_id="6" />
+	<beacon_dataset_consent_code_table dataset_id="EGAD00000000005" consent_code_id="2" />
+	<beacon_dataset_consent_code_table dataset_id="EGAD00000000005" consent_code_id="3" />
+</dataset>
