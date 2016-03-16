@@ -1,9 +1,0 @@
-[submodule "elixir_beacon"]
-	path = elixir_beacon
-	url = https://github.com/sdelatorrep/elixir_beacon.git
-[submodule "elixir_core"]
-	path = elixir_core
-	url = https://github.com/sdelatorrep/elixir_core.git
-[submodule "elixir_beacon_tests"]
-	path = elixir_beacon_tests
-	url = https://github.com/sdelatorrep/elixir_beacon_tests.git
