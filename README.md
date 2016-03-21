@@ -129,7 +129,7 @@ It will also output the number of variants extracted from the VCF. This value is
 INSERT INTO beacon_dataset(id, description, access_type, reference_genome, size)
     VALUES ('dataset_id', 'dataset_description', 'PUBLIC', 'grch37', 123456);
 ```
-NOTE: Remember to replace the values in the previous command with the correct ones.
+NOTE: Remember to replace the values in the previous command with the correct ones. Use lower case in the **reference_genome** field.
 
 * Load the generated file into **beacon_data_table**:
 ```
