@@ -15,7 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
-  Environment environment;
+  private Environment environment;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
