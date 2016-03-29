@@ -1,7 +1,9 @@
 package org.ega_archive.elixirbeacon.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,8 +14,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
 
+  @Autowired
+  Environment environment;
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+
+    String apiVersion = environment.getProperty("server.servlet-path");
 
     http.sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS); //Do not create sessions
@@ -25,17 +32,17 @@ public class BasicSecurityConfig extends WebSecurityConfigurerAdapter {
     http.httpBasic();
 
     http.authorizeRequests()
-        .antMatchers("/v1/info").authenticated()
-        .antMatchers("/v1/metrics/**").authenticated()
-        .antMatchers("/v1/dump").authenticated()
-        .antMatchers("/v1/trace").authenticated()
-        .antMatchers("/v1/mappings").authenticated()
-        .antMatchers("/v1/config/**").authenticated()
-        .antMatchers("/v1/autoconfig").authenticated()
-        .antMatchers("/v1/beans").authenticated()
-        .antMatchers("/v1/health").authenticated()
-        .antMatchers("/v1/configprops").authenticated()
-        .antMatchers("/v1/login").permitAll();
+        .antMatchers(apiVersion + "/info").authenticated()
+        .antMatchers(apiVersion + "/metrics/**").authenticated()
+        .antMatchers(apiVersion + "/dump").authenticated()
+        .antMatchers(apiVersion + "/trace").authenticated()
+        .antMatchers(apiVersion + "/mappings").authenticated()
+        .antMatchers(apiVersion + "/config/**").authenticated()
+        .antMatchers(apiVersion + "/autoconfig").authenticated()
+        .antMatchers(apiVersion + "/beans").authenticated()
+        .antMatchers(apiVersion + "/health").authenticated()
+        .antMatchers(apiVersion + "/configprops").authenticated()
+        .antMatchers(apiVersion + "/login").permitAll();
   }
   //END CONFIGURATION
 
