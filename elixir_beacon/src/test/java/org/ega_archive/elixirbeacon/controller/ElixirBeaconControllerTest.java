@@ -8,7 +8,6 @@ import org.ega_archive.elixircore.util.JsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -64,7 +63,6 @@ import static org.hamcrest.Matchers.nullValue;
 public class ElixirBeaconControllerTest {
 
   @Autowired
-  @InjectMocks
   private ElixirBeaconController controller;
   
   private MockMvc mockMvc;
