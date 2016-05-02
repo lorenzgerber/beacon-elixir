@@ -1,7 +1,7 @@
 #Docker
 Docker image available at: https://hub.docker.com/r/egacrg/beacon/
 
-It includes beacon instance already deployed and running and a Postgres database with some sample data.
+It includes the beacon application already deployed and running and a Postgres database with some sample data.
 
 #Requirements
 * Java 8 JDK
