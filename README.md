@@ -3,6 +3,20 @@ Docker image available at: https://hub.docker.com/r/egacrg/beacon/
 
 It includes the Elixir Beacon application, already deployed and running, and a PostgreSQL database with some sample data.
 
+The JAR file is located at /tmp folder with the default configuration (for further information see section [Elixir Beacon, the main project](https://github.com/elixirhub/human-data-beacon#elixir-beacon-the-main-project)).
+
+The database used is called elixir_beacon_dev and the default user and password are micoraccounts_dev and r783qjkldDsiu. If you change anything of this configuration you must also change it in the **application-dev.properties** file inside the JAR file (see section [Configuration files](https://github.com/elixirhub/human-data-beacon#configuration-files)). You only need to edit this properties file (no recompilation needed) and redeploy the application (see section [Deploy the JAR](https://github.com/elixirhub/human-data-beacon#deploy-the-jar)).
+
+To load your own data into the database, frist remove sample data provided by default:
+```
+psql -h localhost -p 5432 -U microaccounts_dev -d elixir_beacon_dev
+```
+```sql
+TRUNCATE beacon_dataset_table;
+TRUNCATE beacon_data_table;
+```
+And load your own data (see section [Load data](https://github.com/elixirhub/human-data-beacon#load-the-data)).
+
 #Requirements
 * Java 8 JDK
 * Apache Maven 3
