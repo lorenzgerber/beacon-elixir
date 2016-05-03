@@ -9,6 +9,7 @@ The database used is called elixir_beacon_dev and the default user and password 
 
 To load your own data into the database, frist remove sample data provided by default:
 ```
+docker attach the_identifier_of_the_image
 psql -h localhost -p 5432 -U microaccounts_dev -d elixir_beacon_dev
 ```
 ```sql
@@ -16,6 +17,8 @@ TRUNCATE beacon_dataset_table;
 TRUNCATE beacon_data_table;
 ```
 And load your own data (see section [Load data](https://github.com/elixirhub/human-data-beacon#load-the-data)).
+
+To detach from the docker container press <code>Ctrl + p + q</code>.
 
 #Requirements
 * Java 8 JDK
