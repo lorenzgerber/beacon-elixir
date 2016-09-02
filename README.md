@@ -367,10 +367,10 @@ Parameters:
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
-  "exists" : true,
+  "exists" : false,
   "error" : null,
   "alleleRequest" : {
-    "alternateBases" : "A",
+    "alternateBases" : null,
     "referenceBases" : null,
     "referenceName" : "1",
     "start" : 179832996,
@@ -383,24 +383,24 @@ Parameters:
 ```
 Or you can ask for the same information in an specific dataset:
 
-[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true)
+[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=true](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=true)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
-  "exists" : true,
+  "exists" : false,
   "error" : null,
   "alleleRequest" : {
-    "alternateBases" : "A",
+    "alternateBases" : null,
     "referenceBases" : null,
     "referenceName" : "1",
     "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00001000740" ],
+    "datasetIds" : [ "EGAD00000000028" ],
     "includeDatasetResponses" : true
   },
   "datasetAlleleResponses" : [ {
-    "datasetId" : "EGAD00001000740",
-    "exists" : true,
+    "datasetId" : "EGAD00000000028",
+    "exists" : false,
     "error" : null,
     "frequency" : null,
     "variantCount" : null,
