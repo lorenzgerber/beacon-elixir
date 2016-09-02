@@ -14,7 +14,7 @@ public interface BeaconDatasetRepository extends CustomQuerydslJpaRepository<Bea
   
   public Page<BeaconDataset> findByReferenceGenome(String referenceGenome, Pageable page);
   
-  @Query("SELECT d.id FROM BeaconDataset d WHERE d.accessType=?1 ORDER BY d.id")
-  public List<String> findByAccessType(String accessType);
-
+  @Query("SELECT d.id FROM BeaconDataset d WHERE d.referenceGenome=?1 AND d.accessType=?2 ORDER BY d.id")
+  public List<String> findByReferenceGenomeAndAccessType(String referenceGenome, String accessType);
+  
 }

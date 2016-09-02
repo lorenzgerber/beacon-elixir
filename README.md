@@ -56,7 +56,7 @@ cd target
 java -jar elixir-beacon-0.3.jar --spring.profiles.active=dev
 ```
 * Go to 
-  * [localhost:9075/elixirbeacon/v03/beacon/info](http://localhost:9075/elixirbeacon/v03/beacon/info)
+  * [localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
   * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
 
 #Configure databases
@@ -239,15 +239,15 @@ For other configurations please add a profile in pom.xml file. You will see the 
 
 #Using the application
 The application publishes two endpoints:
-* /beacon/info
+* /beacon/
 * /beacon/query
 
 They are defined in the **org.ega_archive.elixirbeacon.ElixirBeaconController** class.
 
-##/beacon/info
+##/beacon/
 Returns the information about this beacon: its Id, name and description, the API version it is compliant with, the URL where you can access this beacon, etc.
 
-[localhost:9075/elixirbeacon/v03/beacon/info](http://localhost:9075/elixirbeacon/v03/beacon/info)
+[localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
 ```json
 {
   "id" : "elixir-demo-beacon",

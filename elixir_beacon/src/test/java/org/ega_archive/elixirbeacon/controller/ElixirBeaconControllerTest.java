@@ -8,6 +8,7 @@ import org.ega_archive.elixircore.util.JsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -42,27 +43,17 @@ import static org.hamcrest.Matchers.nullValue;
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:0")
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, TransactionDbUnitTestExecutionListener.class})
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+    TransactionDbUnitTestExecutionListener.class})
 @DbUnitConfiguration(databaseConnection = {"elixirbeaconDataSource"})
-@DatabaseSetup(value = {"/db/beacon_dataset_table.xml", 
-    "/db/beacon_data_table.xml",
-    "/db/adam_value_table.xml", 
-    "/db/adam_table.xml", 
-    "/db/beacon_dataset_adam_detailed_table.xml",
-    "/db/beacon_dataset_adam_table.xml", 
-    "/db/consent_code_category_table.xml", 
-    "/db/consent_code_table.xml",
-    "/db/beacon_dataset_consent_code_table.xml"}, type = DatabaseOperation.CLEAN_INSERT)
-@DatabaseTearDown(value = {"/db/beacon_dataset_adam_table.xml",
-    "/db/beacon_dataset_adam_detailed_table.xml", "/db/beacon_dataset_consent_code_table.xml"},
-    type = DatabaseOperation.DELETE_ALL)
-@DatabaseTearDown(value = {"/db/beacon_dataset_table.xml", "/db/beacon_data_table.xml",
-    "/db/beacon_data_table.xml", "/db/adam_value_table.xml", "/db/adam_table.xml",
-    "/db/consent_code_category_table.xml", "/db/consent_code_table.xml"},
+@DatabaseSetup(value = {"/db/beacon_dataset_table.xml", "/db/beacon_data_table.xml"},
+    type = DatabaseOperation.CLEAN_INSERT)
+@DatabaseTearDown(value = {"/db/beacon_dataset_table.xml", "/db/beacon_data_table.xml"},
     type = DatabaseOperation.DELETE_ALL)
 public class ElixirBeaconControllerTest {
 
   @Autowired
+  @InjectMocks
   private ElixirBeaconController controller;
   
   private MockMvc mockMvc;
@@ -79,18 +70,6 @@ public class ElixirBeaconControllerTest {
         .alwaysExpect(status().isOk())
         .alwaysExpect(content().contentType(TestUtils.APPLICATION_JSON_CHARSET_UTF_8))
         .build();
-  }
-
-  @Test
-  public void callInfo() throws Exception {
-    
-    MvcResult mvcResult = mockMvc.perform(get("/beacon/info")
-        .accept(MediaType.APPLICATION_JSON))
-        .andReturn();
-    
-    String response = mvcResult.getResponse().getContentAsString();
-    
-    assertThat(response, notNullValue());
   }
   
   @Test
@@ -112,7 +91,7 @@ public class ElixirBeaconControllerTest {
         .param(ParamName.BEACON_ALTERNATE_BASES, "A")
         .param(ParamName.BEACON_CHROMOSOME, "19")
         .param(ParamName.BEACON_DATASET_IDS, "EGAD00000000001")
-        .param(ParamName.BEACON_POSITION, "1234")
+        .param(ParamName.BEACON_START, "1234")
         .param(ParamName.BEACON_REFERENCE_GENOME, "grch37")
         .accept(MediaType.APPLICATION_JSON))
         .andReturn();
@@ -124,7 +103,7 @@ public class ElixirBeaconControllerTest {
     
     mvcResult = mockMvc.perform(post("/beacon/query")
         .param(ParamName.BEACON_CHROMOSOME, "19")
-        .param(ParamName.BEACON_POSITION, "1234")
+        .param(ParamName.BEACON_START, "1234")
         .param(ParamName.BEACON_REFERENCE_GENOME, "grch37")
         .accept(MediaType.APPLICATION_JSON))
         .andReturn();
@@ -152,46 +131,6 @@ public class ElixirBeaconControllerTest {
     
     BeaconAlleleResponse response = JsonUtils.jsonToObject(mvcResult.getResponse().getContentAsString(), BeaconAlleleResponse.class, objectMapper);
     
-    assertThat(response, notNullValue());
-    assertThat(response.getError(), nullValue());
-  }
-  
-  /**
-   * Try to use both, position and start, at the same time.
-   * 
-   * @throws Exception
-   */
-  @Test
-  public void callQueryWithBothPositionAndStart() throws Exception {
-
-    MvcResult mvcResult = mockMvc.perform(post("/beacon/query")
-        .param(ParamName.BEACON_CHROMOSOME, "19")
-        .param(ParamName.BEACON_POSITION, "1234")
-        .param(ParamName.BEACON_START, "1234")
-        .param(ParamName.BEACON_REFERENCE_GENOME, "grch37")
-        .accept(MediaType.APPLICATION_JSON))
-        .andReturn();
-    
-    BeaconAlleleResponse response = JsonUtils.jsonToObject(mvcResult.getResponse().getContentAsString(), BeaconAlleleResponse.class, objectMapper);
-    
-    assertThat(response, notNullValue());
-    assertThat(response.getError(), notNullValue());
-  }
-  
-  @Test
-  public void callAlleles() throws Exception {
-    
-    MvcResult mvcResult = mockMvc.perform(get("/beacon/alleles")
-        .param(ParamName.BEACON_ALTERNATE_BASES, "A")
-        .param(ParamName.BEACON_CHROMOSOME, "19")
-        .param(ParamName.BEACON_DATASET_IDS, "EGAD00000000001")
-        .param(ParamName.BEACON_POSITION, "1234")
-        .param(ParamName.BEACON_REFERENCE_GENOME, "grch37")
-        .accept(MediaType.APPLICATION_JSON))
-        .andReturn();
-    
-    BeaconAlleleResponse response = JsonUtils.jsonToObject(mvcResult.getResponse().getContentAsString(), BeaconAlleleResponse.class, objectMapper);
-
     assertThat(response, notNullValue());
     assertThat(response.getError(), nullValue());
   }
