@@ -267,75 +267,15 @@ Returns the information about this beacon: its Id, name and description, the API
   "version" : "v03",
   "welcomeUrl" : "https://ega-archive.org/elixir_demo_beacon/",
   "alternativeUrl" : "https://ega-archive.org/elixir_demo_beacon_web/",
-  "created" : 1433116800000,
-  "updated" : null,
+  "createDateTime" : "2015-06-01T00:00.000Z",
+  "updateDateTime" : null,
   "datasets" : [ {
     "id" : "EGAD00001000740",
     "name" : null,
     "description" : "Low-coverage whole genome sequencing; variant calling, genotype calling and phasing",
     "assemblyId" : "grch37",
-    "dataUseConditions" : [ {
-      "header" : {
-        "name" : "Consent Code",
-        "version" : "0.1",
-        "furtherDetails" : "http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1005772"
-      },
-      "profile" : {
-        "primaryCategory" : {
-          "code" : "GRU",
-          "description" : "For health/medical/biomedical purposes, including the study of population origins or ancestry."
-        },
-        "secondaryCategories" : [ {
-          "code" : "NMDS",
-          "description" : "Use of the data includes methods development research (e.g., development of software or algorithms) ONLY within the bounds of other data use limitations.",
-          "details" : "Statistical Methods"
-        } ],
-        "requirements" : [ {
-          "code" : "NPU",
-          "description" : "Use of the data is limited to not-for-profit organizations."
-        }, {
-          "code" : "MOR",
-          "description" : "Requestor agrees not to publish results of studies until [date].",
-          "details" : "X-Expired"
-        }, {
-          "code" : "US",
-          "description" : "Use of data is limited to use by approved users."
-        }, {
-          "code" : "PS",
-          "description" : "Use of data is limited to use within an approved project."
-        } ]
-      }
-    }, {
-      "header" : {
-        "name" : "ADA-M",
-        "version" : "0.2",
-        "furtherDetails" : "http://p3g.org/sites/default/files/site/default/files/ADAM_introductiontext_21Jan2016.pdf"
-      },
-      "profile" : {
-        "anyResearch" : "UNTRUE",
-        "anyMethodsDevelopmentResearch" : "TRUE",
-        "anyGeneticResearch" : "TRUE",
-        "anyNonProfitPurpose" : "TRUE",
-        "allowedNonProfitPurposes" : "Advance and understaing of genetics and genomics , including the treatment of disorders, and work on statistical mehods tha migh be applied to such research. ",
-        "noOtherConditions" : "UNTRUE",
-        "whichOtherConditions" : "Data can be used as controls, A copy of the DAA has to be distributed to all authorized personal .",
-        "noAuthorizationObligations" : "UNTRUE",
-        "whichAuthorizationObligations" : "An applicant having signed this Data Access Agreement , whose institution has co-signed this Data Acces Agreement , both of them having received acknowledge of its acceptance ",
-        "noPublicationObligations" : "TRUE",
-        "noTimelineObligations" : "UNTRUE",
-        "whichTimelineObligations" : "Agree to update the list of authorized personnel to reflect any changes or departures in affiliated researches and personnel within 30 days of the change made. ",
-        "noExpungingObligations" : "UNTRUE",
-        "whichExpungingObligations" : "Data helds, will be destroyed , once it is no longer used for the aaproved research, unlesss obliged to retain the data for the archival purposes in conformity with instituitonal policies.",
-        "noLinkingObligations" : "UNTRUE",
-        "whichLinkingObligations" : "Acknowledge the published paper, version of data and the role of the consortium.",
-        "noIPClaimObligations" : "UNTRUE",
-        "whichIPClaimObligations" : "Data is protected by international copywright laws, Nothing in the agreement shall operate to transfer to the user institution  any property or intelectual rights. The user institution has the right to develop property based on comparisons with their own data , but not to make intelectual property claims on the data, nor use intelectual property protecion in ways that would prevent, or block access to, or useof, any element of the Data, or conclusions drawn from the Data.  If results arising from the User and User Institution  use of the data could provide could provide health solutions for the benefit of people in the development world , the user and the user institution agree to offer non- exlusive licenses to such results on a reasonable basis for the use for the use in low income and low -middle income countries (as defined by the world bank) to any party that request suvh a license solely for the use within these territories.",
-        "noReportingObligations" : "UNTRUE",
-        "whichReportingObligations" : "A report must be submited to the DAC if requested on the agreed completion of purpose."
-      }
-    } ],
-    "created" : null,
-    "updated" : null,
+    "createDateTime" : null,
+    "updateDateTime" : null,
     "version" : null,
     "variantCount" : 43623891,
     "callCount" : null,
