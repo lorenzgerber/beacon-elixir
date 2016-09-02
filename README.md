@@ -57,7 +57,7 @@ java -jar elixir-beacon-0.3.jar --spring.profiles.active=dev
 ```
 * Go to 
   * [localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
-  * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
+  * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
 
 #Configure databases
 ##Create databases
@@ -350,9 +350,10 @@ Returns the information about this beacon: its Id, name and description, the API
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : null
+    "datasetIds" : null,
+    "includeDatasetResponses" : false
   } ],
   "info" : {
     "size" : "87247782"
@@ -391,14 +392,16 @@ Parameters:
     * I. e. GRCh37
 * referenceName
     * Accepted values: 1-22, X, Y, MT
-* position
+* start
 * alternate (optional)
     * Regular expression: [ACTG]+
     * I. e. alternate=A, alternate=CG, etc.
 * datasetIds (optional)
     * I. e. ?datasetIds=some-id&datasetIds=another-id
+* includeDatasetResponses (optional, default value: false)
+    * If true, the response will include detailed information for each dataset.
 
-[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37)
+[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
@@ -408,16 +411,17 @@ Parameters:
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : null
+    "datasetIds" : null,
+    "includeDatasetResponses" : false
   },
   "datasetAlleleResponses" : null
 }
 ```
 Or you can ask for the same information in an specific dataset:
 
-[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740)
+[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
@@ -427,9 +431,10 @@ Or you can ask for the same information in an specific dataset:
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00001000740" ]
+    "datasetIds" : [ "EGAD00001000740" ],
+    "includeDatasetResponses" : true
   },
   "datasetAlleleResponses" : [ {
     "datasetId" : "EGAD00001000740",
@@ -524,12 +529,12 @@ You have two options:
             return null;
           }
          
-          public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer position, String referenceGenome) {
+          public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {
             //Write here your custom code
             return null;
           }
          
-          public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer position, String referenceGenome) {
+          public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {
             //Write here your custom code
             return null;
           }
