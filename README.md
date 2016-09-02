@@ -78,8 +78,8 @@ cd target
 java -jar elixir-beacon-0.3.jar --spring.profiles.active=dev
 ```
 * Go to 
-  * [localhost:9075/elixirbeacon/v03/beacon/info](http://localhost:9075/elixirbeacon/v03/beacon/info)
-  * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&position=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
+  * [localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
+  * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
 
 #Configure databases
 ##Create databases
@@ -261,15 +261,15 @@ For other configurations please add a profile in pom.xml file. You will see the 
 
 #Using the application
 The application publishes two endpoints:
-* /beacon/info
+* /beacon/
 * /beacon/query
 
 They are defined in the **org.ega_archive.elixirbeacon.ElixirBeaconController** class.
 
-##/beacon/info
+##/beacon/
 Returns the information about this beacon: its Id, name and description, the API version it is compliant with, the URL where you can access this beacon, etc.
 
-[localhost:9075/elixirbeacon/v03/beacon/info](http://localhost:9075/elixirbeacon/v03/beacon/info)
+[localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
 ```json
 {
   "id" : "elixir-demo-beacon",
@@ -289,75 +289,15 @@ Returns the information about this beacon: its Id, name and description, the API
   "version" : "v03",
   "welcomeUrl" : "https://ega-archive.org/elixir_demo_beacon/",
   "alternativeUrl" : "https://ega-archive.org/elixir_demo_beacon_web/",
-  "created" : 1433116800000,
-  "updated" : null,
+  "createDateTime" : "2015-06-01T00:00.000Z",
+  "updateDateTime" : null,
   "datasets" : [ {
     "id" : "EGAD00001000740",
     "name" : null,
     "description" : "Low-coverage whole genome sequencing; variant calling, genotype calling and phasing",
     "assemblyId" : "grch37",
-    "dataUseConditions" : [ {
-      "header" : {
-        "name" : "Consent Code",
-        "version" : "0.1",
-        "furtherDetails" : "http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1005772"
-      },
-      "profile" : {
-        "primaryCategory" : {
-          "code" : "GRU",
-          "description" : "For health/medical/biomedical purposes, including the study of population origins or ancestry."
-        },
-        "secondaryCategories" : [ {
-          "code" : "NMDS",
-          "description" : "Use of the data includes methods development research (e.g., development of software or algorithms) ONLY within the bounds of other data use limitations.",
-          "details" : "Statistical Methods"
-        } ],
-        "requirements" : [ {
-          "code" : "NPU",
-          "description" : "Use of the data is limited to not-for-profit organizations."
-        }, {
-          "code" : "MOR",
-          "description" : "Requestor agrees not to publish results of studies until [date].",
-          "details" : "X-Expired"
-        }, {
-          "code" : "US",
-          "description" : "Use of data is limited to use by approved users."
-        }, {
-          "code" : "PS",
-          "description" : "Use of data is limited to use within an approved project."
-        } ]
-      }
-    }, {
-      "header" : {
-        "name" : "ADA-M",
-        "version" : "0.2",
-        "furtherDetails" : "http://p3g.org/sites/default/files/site/default/files/ADAM_introductiontext_21Jan2016.pdf"
-      },
-      "profile" : {
-        "anyResearch" : "UNTRUE",
-        "anyMethodsDevelopmentResearch" : "TRUE",
-        "anyGeneticResearch" : "TRUE",
-        "anyNonProfitPurpose" : "TRUE",
-        "allowedNonProfitPurposes" : "Advance and understaing of genetics and genomics , including the treatment of disorders, and work on statistical mehods tha migh be applied to such research. ",
-        "noOtherConditions" : "UNTRUE",
-        "whichOtherConditions" : "Data can be used as controls, A copy of the DAA has to be distributed to all authorized personal .",
-        "noAuthorizationObligations" : "UNTRUE",
-        "whichAuthorizationObligations" : "An applicant having signed this Data Access Agreement , whose institution has co-signed this Data Acces Agreement , both of them having received acknowledge of its acceptance ",
-        "noPublicationObligations" : "TRUE",
-        "noTimelineObligations" : "UNTRUE",
-        "whichTimelineObligations" : "Agree to update the list of authorized personnel to reflect any changes or departures in affiliated researches and personnel within 30 days of the change made. ",
-        "noExpungingObligations" : "UNTRUE",
-        "whichExpungingObligations" : "Data helds, will be destroyed , once it is no longer used for the aaproved research, unlesss obliged to retain the data for the archival purposes in conformity with instituitonal policies.",
-        "noLinkingObligations" : "UNTRUE",
-        "whichLinkingObligations" : "Acknowledge the published paper, version of data and the role of the consortium.",
-        "noIPClaimObligations" : "UNTRUE",
-        "whichIPClaimObligations" : "Data is protected by international copywright laws, Nothing in the agreement shall operate to transfer to the user institution  any property or intelectual rights. The user institution has the right to develop property based on comparisons with their own data , but not to make intelectual property claims on the data, nor use intelectual property protecion in ways that would prevent, or block access to, or useof, any element of the Data, or conclusions drawn from the Data.  If results arising from the User and User Institution  use of the data could provide could provide health solutions for the benefit of people in the development world , the user and the user institution agree to offer non- exlusive licenses to such results on a reasonable basis for the use for the use in low income and low -middle income countries (as defined by the world bank) to any party that request suvh a license solely for the use within these territories.",
-        "noReportingObligations" : "UNTRUE",
-        "whichReportingObligations" : "A report must be submited to the DAC if requested on the agreed completion of purpose."
-      }
-    } ],
-    "created" : null,
-    "updated" : null,
+    "createDateTime" : null,
+    "updateDateTime" : null,
     "version" : null,
     "variantCount" : 43623891,
     "callCount" : null,
@@ -372,9 +312,10 @@ Returns the information about this beacon: its Id, name and description, the API
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : null
+    "datasetIds" : null,
+    "includeDatasetResponses" : false
   } ],
   "info" : {
     "size" : "87247782"
@@ -413,14 +354,16 @@ Parameters:
     * I. e. GRCh37
 * referenceName
     * Accepted values: 1-22, X, Y, MT
-* position
+* start
 * alternate (optional)
     * Regular expression: [ACTG]+
     * I. e. alternate=A, alternate=CG, etc.
 * datasetIds (optional)
     * I. e. ?datasetIds=some-id&datasetIds=another-id
+* includeDatasetResponses (optional, default value: false)
+    * If true, the response will include detailed information for each dataset.
 
-[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37)
+[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
@@ -430,16 +373,17 @@ Parameters:
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : null
+    "datasetIds" : null,
+    "includeDatasetResponses" : false
   },
   "datasetAlleleResponses" : null
 }
 ```
 Or you can ask for the same information in an specific dataset:
 
-[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&position=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740)
+[localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=1&start=179832996&assemblyId=GRCh37&datasetIds=EGAD00001000740&includeDatasetResponses=true)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
@@ -449,9 +393,10 @@ Or you can ask for the same information in an specific dataset:
     "alternateBases" : "A",
     "referenceBases" : null,
     "referenceName" : "1",
-    "position" : 179832996,
+    "start" : 179832996,
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00001000740" ]
+    "datasetIds" : [ "EGAD00001000740" ],
+    "includeDatasetResponses" : true
   },
   "datasetAlleleResponses" : [ {
     "datasetId" : "EGAD00001000740",
@@ -546,12 +491,12 @@ You have two options:
             return null;
           }
          
-          public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer position, String referenceGenome) {
+          public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {
             //Write here your custom code
             return null;
           }
          
-          public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer position, String referenceGenome) {
+          public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {
             //Write here your custom code
             return null;
           }

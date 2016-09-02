@@ -3,13 +3,16 @@ package org.ega_archive.elixirbeacon.dto;
 import java.util.List;
 import java.util.Map;
 
-import org.ega_archive.elixirbeacon.constant.BeaconConstants;
-import org.ega_archive.elixircore.constant.CoreConstants;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+
+import org.ega_archive.elixirbeacon.constant.BeaconConstants;
+import org.ega_archive.elixircore.constant.CoreConstants;
+import org.joda.time.DateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @Builder
@@ -41,11 +44,13 @@ public class Beacon {
   // Alternative URL to the API, e.g. a restricted version of this beacon
   private String alternativeUrl = BeaconConstants.BEACON_ALTERNATIVE_URL;
   
-  // The time this beacon was created in ms from the epoch
-  private Long created = BeaconConstants.BEACON_CREATED;
+  // The time the beacon was created (ISO 8601 format)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = BeaconConstants.ISO8601_DATE_TIME_PATTERN)
+  private DateTime createDateTime = BeaconConstants.BEACON_CREATED;
   
-  // The time this beacon was last updated in ms from the epoch
-  private Long updated = BeaconConstants.BEACON_EDITED;
+  // The time this beacon was last updated (ISO 8601 format)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = BeaconConstants.ISO8601_DATE_TIME_PATTERN)
+  private DateTime updateDateTime = BeaconConstants.BEACON_EDITED;
   
   // Datasets served by the beacon. Any beacon should specify at least one dataset.
   private List<Dataset> datasets;

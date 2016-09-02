@@ -48,8 +48,8 @@ public class ParamName {
   public static final String BEACON_ALTERNATE_BASES = "alternatebases";
   public static final String BEACON_REFERENCE_BASES = "referencebases";
   public static final String BEACON_CHROMOSOME = "referencename";
-  public static final String BEACON_POSITION = "position";
   public static final String BEACON_START = "start";
   public static final String BEACON_REFERENCE_GENOME = "assemblyid";
+  public static final String BEACON_INCLUDE_DATASET_RESPONSES = "includedatasetresponses";
 
 }

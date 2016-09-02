@@ -29,13 +29,13 @@ public interface ElixirBeaconService {
    * @param alternateBases
    * @param referenceBases
    * @param chromosome
-   * @param position
-   * @param start TODO
+   * @param start
    * @param referenceGenome
    * @return
    */
   public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases,
-      String referenceBases, String chromosome, Integer position, Integer start, String referenceGenome);
+      String referenceBases, String chromosome, Integer start, String referenceGenome,
+      boolean includeDatasetResponses);
 
   /**
    * Verifies that mandatory parameters are present and that all parameters are valid.
@@ -45,13 +45,12 @@ public interface ElixirBeaconService {
    * @param alternateBases
    * @param referenceBases
    * @param chromosome
-   * @param position
-   * @param start TODO
+   * @param start
    * @param referenceGenome
    * @return
    */
   public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds,
-      String alternateBases, String referenceBases, String chromosome, Integer position,
-      Integer start, String referenceGenome);
+      String alternateBases, String referenceBases, String chromosome, Integer start,
+      String referenceGenome);
 
 }

@@ -17,13 +17,9 @@ import org.ega_archive.elixirbeacon.dto.Dataset;
 import org.ega_archive.elixirbeacon.dto.DatasetAlleleResponse;
 import org.ega_archive.elixirbeacon.dto.Error;
 import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDataset;
-import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDatasetAdam;
-import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDatasetConsentCode;
 import org.ega_archive.elixirbeacon.model.elixirbeacon.QBeaconData;
 import org.ega_archive.elixirbeacon.properties.SampleRequests;
 import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDataRepository;
-import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDatasetAdamRepository;
-import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDatasetConsentCodeRepository;
 import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDatasetRepository;
 import org.ega_archive.elixircore.enums.DatasetAccessType;
 import org.ega_archive.elixircore.helper.CommonQuery;
@@ -48,12 +44,6 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   
   @Autowired
   private BeaconDataRepository beaconDataRepository;
-
-  @Autowired
-  private BeaconDatasetAdamRepository beaconDatasetAdamRepository;
-  
-  @Autowired
-  private BeaconDatasetConsentCodeRepository beaconDatasetConsentCodeRepository;
   
   @Override
   public Beacon listDatasets(CommonQuery commonQuery, String referenceGenome) {
@@ -78,10 +68,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
       if (accessType == DatasetAccessType.PUBLIC) {
         authorized = true;
       }
-      List<BeaconDatasetConsentCode> ccDataUseConditions = beaconDatasetConsentCodeRepository.findByDatasetId(dataset.getId());
-      List<BeaconDatasetAdam> adamDataUseConditions = beaconDatasetAdamRepository.findByDatasetId(dataset.getId());
-      
-      convertedDatasets.add(Operations.convert(dataset, authorized, ccDataUseConditions, adamDataUseConditions));
+      convertedDatasets.add(Operations.convert(dataset, authorized));
       size += dataset.getSize();
     }
 
@@ -99,21 +86,21 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
     List<BeaconAlleleRequest> sampleAlleleRequests = new ArrayList<BeaconAlleleRequest>();
     sampleAlleleRequests.add(BeaconAlleleRequest.builder()
         .assemblyId(sampleRequests.getAssemblyId1())
-        .position(sampleRequests.getPosition1())
+        .start(sampleRequests.getPosition1())
         .chromosome(sampleRequests.getReferenceName1())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases1()) ? null : sampleRequests.getAlternateBases1())
         .datasetIds(sampleRequests.getDatasetIds1().isEmpty() ? null : sampleRequests.getDatasetIds1())
         .build());
     sampleAlleleRequests.add(BeaconAlleleRequest.builder()
         .assemblyId(sampleRequests.getAssemblyId2())
-        .position(sampleRequests.getPosition2())
+        .start(sampleRequests.getPosition2())
         .chromosome(sampleRequests.getReferenceName2())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases2()) ? null : sampleRequests.getAlternateBases2())
         .datasetIds(sampleRequests.getDatasetIds2().isEmpty() ? null : sampleRequests.getDatasetIds2())
         .build());
     sampleAlleleRequests.add(BeaconAlleleRequest.builder()
         .assemblyId(sampleRequests.getAssemblyId3())
-        .position(sampleRequests.getPosition3())
+        .start(sampleRequests.getPosition3())
         .chromosome(sampleRequests.getReferenceName3())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases3()) ? null : sampleRequests.getAlternateBases3())
         .datasetIds(sampleRequests.getDatasetIds3().isEmpty() ? null : sampleRequests.getDatasetIds3())
@@ -123,7 +110,8 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
 
   @Override
   public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases,
-      String referenceBases, String chromosome, Integer position, Integer start, String referenceGenome) {
+      String referenceBases, String chromosome, Integer start, String referenceGenome,
+      boolean includeDatasetResponses) {
 
     BeaconAlleleResponse result = new BeaconAlleleResponse();
     
@@ -135,22 +123,20 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         .referenceBases(referenceBases)
         .chromosome(chromosome)
         .datasetIds(datasetStableIds)
-        .position(position != null ? position : start)
+        .start(start)
         .assemblyId(referenceGenome)
+        .includeDatasetResponses(includeDatasetResponses)
         .build();
     result.setAlleleRequest(request);
     
     datasetStableIds =
-        checkParams(result, datasetStableIds, alternateBases, referenceBases, chromosome, position,
-            start, referenceGenome);
+        checkParams(result, datasetStableIds, alternateBases, referenceBases, chromosome, start,
+            referenceGenome);
 
     boolean globalExists = false;
     if (result.getError() == null) {
-      if(start != null) {
-        position = start;
-      }
       globalExists =
-          queryDatabase(datasetStableIds, alternateBases, chromosome, position, referenceGenome,
+          queryDatabase(datasetStableIds, alternateBases, chromosome, start, referenceGenome,
               result);
     }
     result.setExists(globalExists);
@@ -159,25 +145,13 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
 
   @Override
   public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds,
-      String alternateBases, String referenceBases, String chromosome, Integer position,
-      Integer start, String referenceGenome) {
+      String alternateBases, String referenceBases, String chromosome, Integer start,
+      String referenceGenome) {
 
-    if(position != null && start != null) {
+    if (StringUtils.isBlank(chromosome) || start == null || StringUtils.isBlank(referenceGenome)) {
       Error error = Error.builder()
           .errorCode(HttpStatus.PRECONDITION_FAILED.value())
-          .message("Cannot specify position and start at the same time. Use only one of them.")
-          .build();
-      result.setError(error);
-      return datasetStableIds;
-    }
-    if(start != null) {
-      position = start;
-    }
-    
-    if (StringUtils.isBlank(chromosome) || position == null || StringUtils.isBlank(referenceGenome)) {
-      Error error = Error.builder()
-          .errorCode(HttpStatus.PRECONDITION_FAILED.value())
-          .message("Missing mandatory parameters: referenceName, position/start and/or assemblyId")
+          .message("Missing mandatory parameters: referenceName, start and/or assemblyId")
           .build();
       result.setError(error);
       return datasetStableIds;
@@ -252,29 +226,34 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   }
 
   private boolean queryDatabase(List<String> datasetStableIds, String alternateBases,
-      String chromosome, Integer position, String referenceGenome, BeaconAlleleResponse result) {
-    
+      String chromosome, Integer start, String referenceGenome, BeaconAlleleResponse result) {
+
     QBeaconData qBeacon = QBeaconData.beaconData;
     BooleanExpression condition = qBeacon.id.chromosome.eq(chromosome);
-    condition = condition.and(qBeacon.id.position.eq(position));
+    condition = condition.and(qBeacon.id.position.eq(start));
     if (StringUtils.isNotBlank(alternateBases)) {
       condition = condition.and(qBeacon.id.alternateBases.eq(alternateBases));
     }
     referenceGenome = StringUtils.lowerCase(referenceGenome);
     condition = condition.and(qBeacon.id.referenceGenome.eq(referenceGenome));
-    
-    if(datasetStableIds == null || datasetStableIds.isEmpty()) {
-      List<String> authorizedDatasets = findAuthorizedDatasets();
+
+    if (datasetStableIds == null || datasetStableIds.isEmpty()) {
+      List<String> authorizedDatasets = findAuthorizedDatasets(referenceGenome);
       // Limit the query to only the authorized datasets
-      condition = condition.and(qBeacon.id.datasetId.in(authorizedDatasets));
+      if (!result.getAlleleRequest().isIncludeDatasetResponses()) {
+        condition = condition.and(qBeacon.id.datasetId.in(authorizedDatasets));
+      }
+      datasetStableIds = authorizedDatasets;
     }
 
     long numResults = 0L;
     boolean globalExists = false;
-    
-    if (datasetStableIds != null && !datasetStableIds.isEmpty()) {
+
+    if (result.getAlleleRequest().isIncludeDatasetResponses() && datasetStableIds != null
+        && !datasetStableIds.isEmpty()) {
       for (String datasetStableId : datasetStableIds) {
-        BooleanExpression datasetCondition = condition.and(qBeacon.id.datasetId.eq(datasetStableId));
+        BooleanExpression datasetCondition =
+            condition.and(qBeacon.id.datasetId.eq(datasetStableId));
         numResults = beaconDataRepository.count(datasetCondition);
         DatasetAlleleResponse datasetResponse = new DatasetAlleleResponse();
         datasetResponse.setDatasetId(datasetStableId);
@@ -289,8 +268,10 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
     return globalExists;
   }
 
-  private List<String> findAuthorizedDatasets() {
-    List<String> publicDatasets = beaconDatasetRepository.findByAccessType(DatasetAccessType.PUBLIC.getType());
+  private List<String> findAuthorizedDatasets(String referenceGenome) {
+    List<String> publicDatasets =
+        beaconDatasetRepository.findByReferenceGenomeAndAccessType(referenceGenome,
+            DatasetAccessType.PUBLIC.getType());
     return publicDatasets;
   }
 

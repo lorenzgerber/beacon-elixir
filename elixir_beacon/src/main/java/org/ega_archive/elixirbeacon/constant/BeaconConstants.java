@@ -6,8 +6,6 @@ import org.joda.time.DateTime;
 
 public class BeaconConstants {
 
-  public static final String API = "0.3";
-
   public static final String ORGANIZATION_ID =
       (ApplicationContextProvider.getApplicationContext() != null) ? ApplicationContextProvider
           .getApplicationContext().getEnvironment().getProperty("elixirbeacon.organization.id")
@@ -39,7 +37,11 @@ public class BeaconConstants {
   public static final String ORGANIZATION_CONTACT = (ApplicationContextProvider
       .getApplicationContext() != null) ? ApplicationContextProvider.getApplicationContext()
       .getEnvironment().getProperty("elixirbeacon.organization.contact")
-      : "mailto:sabela.delatorre@crg.eu";
+      : "mailto:beacon.ega@crg.eu";
+
+  public static final String API =
+      (ApplicationContextProvider.getApplicationContext() != null) ? ApplicationContextProvider
+          .getApplicationContext().getEnvironment().getProperty("elixirbeacon.beacon.api") : "0.3";
 
   public static final String BEACON_ID =
       (ApplicationContextProvider.getApplicationContext() != null) ? ApplicationContextProvider
@@ -66,24 +68,26 @@ public class BeaconConstants {
       .getEnvironment().getProperty("elixirbeacon.beacon.alternative.url")
       : "https://ega-archive.org/elixir_beacon_web/";
 
+  public static final String ISO8601_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:ss.SSS'Z'";
+
   // Date of first release
-  public static final Long BEACON_CREATED =
-      (ApplicationContextProvider.getApplicationContext() != null) ? DateTime.parse(
-          ApplicationContextProvider.getApplicationContext().getEnvironment()
-              .getProperty("elixirbeacon.beacon.creation.date")).getMillis() : null;
+  public static final DateTime BEACON_CREATED =
+      (ApplicationContextProvider.getApplicationContext() != null) ? DateTime
+          .parse(ApplicationContextProvider.getApplicationContext().getEnvironment()
+              .getProperty("elixirbeacon.beacon.creation.date")) : null;
 
   // Date of last update
-  public static final Long BEACON_EDITED =
-      ApplicationContextProvider.getApplicationContext() != null 
-      ? (StringUtils.isNotBlank(ApplicationContextProvider.getApplicationContext().getEnvironment().getProperty("elixirbeacon.beacon.last.edition.date")) 
-          ? DateTime.parse(ApplicationContextProvider.getApplicationContext().getEnvironment().getProperty("elixirbeacon.beacon.last.edition.date")).getMillis() 
-              : null) 
-      : null;
+  public static final DateTime BEACON_EDITED =
+      ApplicationContextProvider.getApplicationContext() != null ? (StringUtils
+          .isNotBlank(ApplicationContextProvider.getApplicationContext().getEnvironment()
+              .getProperty("elixirbeacon.beacon.last.edition.date")) ? DateTime
+          .parse(ApplicationContextProvider.getApplicationContext().getEnvironment()
+              .getProperty("elixirbeacon.beacon.last.edition.date")) : null) : null;
 
   public static final String ACCESS_TYPE = "accessType";
-  
+
   public static final String AUTHORIZED = "authorized";
-  
+
   public static final String SIZE = "size";
-          
+
 }

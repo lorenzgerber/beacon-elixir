@@ -22,7 +22,7 @@ public class ElixirBeaconController {
   @Autowired
   private ElixirBeaconService elixirBeaconService;
 
-  @RequestMapping(value = {"/info", "/"}, method = RequestMethod.GET)
+  @RequestMapping(value = "/", method = RequestMethod.GET)
   public Beacon listDatasets(
       Sort sort,
       @RequestParam(required = false) Map<String, String> params) {
@@ -30,18 +30,18 @@ public class ElixirBeaconController {
     return elixirBeaconService.listDatasets(CommonQueryHelper.parseQuery(params, sort), null);
   }
   
-  @RequestMapping(value = {"/query", "/alleles"}, method = {RequestMethod.GET, RequestMethod.POST})
+  @RequestMapping(value = "/query", method = {RequestMethod.GET, RequestMethod.POST})
   public BeaconAlleleResponse queryBeacon(
       @RequestParam(value = ParamName.BEACON_DATASET_IDS, required = false) List<String> datasetStableIds, 
       @RequestParam(value = ParamName.BEACON_ALTERNATE_BASES, required = false) String allele, 
       @RequestParam(value = ParamName.BEACON_REFERENCE_BASES, required = false) String referenceBases, 
       @RequestParam(value = ParamName.BEACON_CHROMOSOME, required = false) String chromosome, 
-      @RequestParam(value = ParamName.BEACON_POSITION, required = false) Integer position,
       @RequestParam(value = ParamName.BEACON_START, required = false) Integer start,
-      @RequestParam(value = ParamName.BEACON_REFERENCE_GENOME, required = false) String referenceGenome) {
+      @RequestParam(value = ParamName.BEACON_REFERENCE_GENOME, required = false) String referenceGenome,
+      @RequestParam(value = ParamName.BEACON_INCLUDE_DATASET_RESPONSES, required = false) boolean includeDatasetResponses) {
     
     return elixirBeaconService.queryBeacon(datasetStableIds, allele, referenceBases, chromosome,
-        position, start, referenceGenome);
+        start, referenceGenome, includeDatasetResponses);
   }
   
 }
