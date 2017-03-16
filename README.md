@@ -1,4 +1,4 @@
-#Docker
+# Docker
 Docker image available at: https://hub.docker.com/r/egacrg/beacon/
 
 It includes the Elixir Beacon application, already deployed and running, and a PostgreSQL database with some sample data.
@@ -20,13 +20,13 @@ And load your own data (see section [Load data](https://github.com/elixirhub/hum
 
 To detach from the docker container press <code>Ctrl + p + q</code>.
 
-#Requirements
+# Requirements
 * Java 8 JDK
 * Apache Maven 3
 * PostgreSQL Server 9.0+, or any other SQL server (i. e. MySQL)
 * JMeter
 
-#Quick start
+# Quick start
 This quick start guide uses the default configuration and sets the application up using some sample data. It requires a Postgres server running in the local machine and listening to the default port 5432.
 
 If you want to tune the configuration or load custom data, please, skip this section and keep reading.
@@ -81,8 +81,8 @@ java -jar elixir-beacon-0.3.jar --spring.profiles.active=dev
   * [localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
   * [localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v03/beacon/query?referenceName=11&start=1951960&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)
 
-#Configure databases
-##Create databases
+# Configure databases
+## Create databases
 * Create two databases. Default names are:
     * **elixir_beacon_dev**: this is the main database that will be used by the application.
     * **elixir_beacon_testing**: this is a secondary database that will be used to run the tests.
@@ -133,7 +133,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO microaccounts_dev;
 ```
 Remember to run these lines in both databases.
 
-##Load the data
+## Load the data
 * Download the [script](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
 ```
 wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh
@@ -159,14 +159,14 @@ cat dataset_id.SNPs | psql -h 127.0.0.1 -p 5432 -U microaccounts_dev -c "COPY be
 ```
 NOTE: This command should be executed only in the **elixir_beacon_dev** database. The testing database will be initialized with some data when the tests are run.
 
-#Managing the code
-##Download the project
+# Managing the code
+## Download the project
 Clone the projects **elixir_beacon** (current one) and **elixir_core** located at the [Elixir's repository](https://github.com/elixirhub/human-data-beacon).
 ```
 git clone https://github.com/elixirhub/human-data-beacon.git
 ```
 
-##Elixir Core
+## Elixir Core
 First of all, it is necessary to compile the code of the **elixir_core** project because it is a dependency of the main project, elixir_beacon.
 ```
 cd elixir_core
@@ -180,8 +180,8 @@ mvn install
 ```
 Now this dependency will be found when compiling the main project, elixir_beacon.
 
-##Elixir Beacon, the main project
-###Configuration files
+## Elixir Beacon, the main project
+### Configuration files
 The key files are **/src/main/resources/application-{profile}.properties** and **/src/test/resources/application-{profile}.properties** (see [Deploy JAR](https://github.com/sdelatorrep/elixir_beacon/blob/master/README.md#deploy-the-jar) for more information about profiles).
 
 By default, the application is deployed at port **9075** and the context is **/elixirbeacon/v03/**. You can change this by modifying the following lines of the application-{profile}.properties file:
@@ -211,7 +211,7 @@ spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialec
  
 If you use a different DB than Postgres, you must add the corresponding library to the **/lib** folder inside the JAR (you don't need to recompile) or add the dependency to the pom.xml so maven can download the library (this will force you to compile, see next step).
 
-##Compile and test the code
+## Compile and test the code
 To compile the code run the following command within the project folder:
 ```
 cd elixir_beacon
@@ -227,7 +227,7 @@ NOTE: To execute the tests you should use a different database than the main one
 
 If compilation and test execution are successful, a JAR file will be generated in the folder **/target** with the name **elixir-beacon-0.3.jar**
 
-##Deploy the JAR
+## Deploy the JAR
 To deploy the JAR run run the following command within the **elixir_beacon/target** folder:
  ```
 cd target
@@ -243,7 +243,7 @@ I. e. **dev** profile will use:
 
 Using the default configuration, the application will be available at: [localhost:9075/elixirbeacon/v03/](http://localhost:9075/elixirbeacon/v03/)
 
-##Run integration tests
+## Run integration tests
 We use JMeter to run this kind of tests. We have an artifact called **elixir-beacon-service-tests**. 
 
 Run:
@@ -259,14 +259,14 @@ The <code>-P local</code> refers to a maven profile. These profiles can be found
 
 For other configurations please add a profile in pom.xml file. You will see the results on the console.
 
-#Using the application
+# Using the application
 The application publishes two endpoints:
 * /beacon/
 * /beacon/query
 
 They are defined in the **org.ega_archive.elixirbeacon.ElixirBeaconController** class.
 
-##/beacon/
+## /beacon/
 Returns the information about this beacon: its Id, name and description, the API version it is compliant with, the URL where you can access this beacon, etc.
 
 [localhost:9075/elixirbeacon/v03/beacon/](http://localhost:9075/elixirbeacon/v03/beacon/)
@@ -346,7 +346,7 @@ querySamples:
   dataset-ids-3: EGAD00001000740
 ```
 
-##/beacon/query
+## /beacon/query
 To actually ask the beacon for questions like "do you have any genomes with an 'A' at position 100,735 on chromosome 3?" And the answer will be yes or no.
 
 Parameters:
@@ -413,8 +413,8 @@ Or you can ask for the same information in an specific dataset:
 }
 ```
 
-#Further information
-##Project structure
+# Further information
+## Project structure
 The project has the following structure:
 * /src/main/java
     * Java files (.java).
@@ -431,7 +431,7 @@ The project has the following structure:
 * /target
     * among other things, contains the .jar file with the compiled classes, libraries, etc.
 
-##Extend/Change functionality
+## Extend/Change functionality
 You have two options:
 
 1. Editing the source code.
