@@ -20,6 +20,9 @@ And load your own data (see section [Load data](https://github.com/elixirhub/hum
 
 To detach from the docker container press <code>Ctrl + p + q</code>.
 
+# Docker UI
+There is a docker image with the Beacon user interface impementation available at: https://github.com/elixir-europe/human-data-beacon-ui
+
 # Requirements
 * Java 8 JDK
 * Apache Maven 3
