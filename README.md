@@ -45,13 +45,13 @@ psql elixir_beacon_dev -U postgres
 GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_dev TO microaccounts_dev;
 GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;
 ```
-* Load the schema (download [elixir_beacon_db_schema.sql](https://github.com/elixirhub/human-data-beacon/blob/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))
+* Load the schema (download [elixir_beacon_db_schema.sql](https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))
 ```
-wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql
+wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql
 psql -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
 psql -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql
 ```
-* Load data (download [EGAD00000000028.SNPs](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/EGAD00000000028.SNPs))
+* Load data (download [EGAD00000000028.SNPs](https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs))
 ```
 psql -d elixir_beacon_dev -U microaccounts_dev
 ```
@@ -60,7 +60,7 @@ INSERT INTO beacon_dataset(id, description, access_type, reference_genome, size)
   VALUES ('EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 34114);
 ```
 ```
-wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/EGAD00000000028.SNPs
+wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs
 cat EGAD00000000028.SNPs | psql -U microaccounts_dev -c "COPY beacon_data_table(dataset_id,chromosome,position,alternate) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev
 ```
 * Download the code
@@ -118,9 +118,9 @@ GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;
 
 NOTE: You can skip this step and load the schema using a super user in the next step and after that, granting privileges to a normal user (this user will be used by the application to connect to the database).
 
-* Download the schema [script](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql) and run it in **both** databases: 
+* Download the schema [script](https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql) and run it in **both** databases: 
 ```
-wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql
+wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql
 psql -h 127.0.0.1 -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
 psql -h 127.0.0.1 -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql
 ```
@@ -137,9 +137,9 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO microaccounts_dev;
 Remember to run these lines in both databases.
 
 ## Load the data
-* Download the [script](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
+* Download the [script](https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
 ```
-wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/vcf_parser.sh
+wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/master/elixir_beacon/src/main/resources/META-INF/vcf_parser.sh
 chmod +x vcf_parser.sh
 ```
 * Run this script executing:
@@ -185,7 +185,7 @@ Now this dependency will be found when compiling the main project, elixir_beacon
 
 ## Elixir Beacon, the main project
 ### Configuration files
-The key files are **/src/main/resources/application-{profile}.properties** and **/src/test/resources/application-{profile}.properties** (see [Deploy JAR](https://github.com/sdelatorrep/elixir_beacon/blob/master/README.md#deploy-the-jar) for more information about profiles).
+The key files are **/src/main/resources/application-{profile}.properties** and **/src/test/resources/application-{profile}.properties** (see [Deploy JAR](https://github.com/elixirhub/human-data-beacon/blob/master/README.md#deploy-the-jar) for more information about profiles).
 
 By default, the application is deployed at port **9075** and the context is **/elixirbeacon/v03/**. You can change this by modifying the following lines of the application-{profile}.properties file:
 ```INI
@@ -226,7 +226,7 @@ To execute only the tests run:
 ```
 mvn test
 ```
-NOTE: To execute the tests you should use a different database than the main one (i. e. elixir_beacon_testing, see [Create databases](https://github.com/sdelatorrep/elixir_beacon/blob/master/README.md#create-databases)).
+NOTE: To execute the tests you should use a different database than the main one (i. e. elixir_beacon_testing, see [Create databases](https://github.com/elixirhub/human-data-beacon/blob/master/README.md#create-databases)).
 
 If compilation and test execution are successful, a JAR file will be generated in the folder **/target** with the name **elixir-beacon-0.3.jar**
 
