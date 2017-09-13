@@ -45,7 +45,7 @@ psql elixir_beacon_dev -U postgres
 GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_dev TO microaccounts_dev;
 GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;
 ```
-* Load the schema (download [elixir_beacon_db_schema.sql](https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql))
+* Load the schema (download [elixir_beacon_db_schema.sql](https://github.com/elixirhub/human-data-beacon/blob/master/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))
 ```
 wget https://raw.githubusercontent.com/sdelatorrep/elixir_beacon/master/src/main/resources/META-INF/elixir_beacon_db_schema.sql
 psql -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql
