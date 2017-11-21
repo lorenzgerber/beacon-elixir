@@ -1,4 +1,14 @@
-#properties
+security:
+  oauth2:
+    client:
+      clientId: <insert your client id> 
+      clientSecret: <insert your client secret>
+      accessTokenUri: https://<insert your open id hostname>/oidc/token
+      userAuthorizationUri: https://<insert your open id hostname>/oidc/authorize
+      tokenName: oauth_token
+      scope: bona_fide_status, openid 
+    resource:
+      userInfoUri: https://<insert your open id hostname>/oauth/rpc/json/oidcManager/userinfo
 #sample #1
 querySamples:
   assembly-id-1: GRCh37
