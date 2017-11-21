@@ -1,2 +1,3 @@
 org.springframework.context.ApplicationListener=\
-org.springframework.boot.actuate.system.ApplicationPidListener,org.ega_archive.elixircore.ApplicationLogListener
+org.springframework.boot.actuate.system.ApplicationPidFileWriter,org.ega_archive.elixircore.ApplicationLogListener
+
