@@ -1,8 +1,13 @@
 package org.ega_archive.elixircore.test.util;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.ega_archive.elixircore.dto.Base;
 import org.ega_archive.elixircore.dto.auth.DrupalRequesterUser;
@@ -14,6 +19,10 @@ import org.ega_archive.elixircore.enums.UserRole;
 import org.ega_archive.elixircore.security.LoginTypeUsernamePasswordAuthenticationToken;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -134,4 +143,33 @@ public class TestUtils {
     SecurityContextHolder.clearContext();//getContext().setAuthentication(null);
   }
 
+  /**
+   * Insert data into database.
+   * 
+   * @param dataSource
+   * @param sqlScripts : specify the path relative to src/test/resources/
+   * @throws SQLException
+   */
+  public static void populateDatabase(DataSource dataSource, String... sqlScripts)
+      throws SQLException {
+
+    List<Resource> resources = new ArrayList<Resource>();
+    for (String script : sqlScripts) {
+      resources.add(new ClassPathResource(script));
+    }
+
+    ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+    populator.addScripts(resources.toArray(new Resource[0]));
+
+    Connection connection = null;
+    try {
+      connection = DataSourceUtils.getConnection(dataSource);
+      populator.populate(connection);
+    } finally {
+      if (connection != null) {
+        DataSourceUtils.releaseConnection(connection, dataSource);
+      }
+    }
+  }
+  
 }

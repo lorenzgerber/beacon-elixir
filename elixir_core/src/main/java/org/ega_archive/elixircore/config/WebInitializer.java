@@ -33,26 +33,26 @@ public class WebInitializer implements ServletContextInitializer {
     // This method adds a Filter to our Servlet so it "intercepts" the servlets calls
     // and if an action method is found, it translate the httpRequest from a get to the method
     // specified in the action parameter.
-    CustomHiddenHttpMethodFilter hiddenHttpMethodFilter = new CustomHiddenHttpMethodFilter();
-    hiddenHttpMethodFilter.setMethodParam("action");
-    servletContext.addFilter("hiddenHttpMethodFilter", hiddenHttpMethodFilter)
-        .addMappingForUrlPatterns(null, true, "/*");
-
-    CustomClientAddressFilter xForwardedForFilter = new CustomClientAddressFilter();
-    servletContext.addFilter("customXForwardedForFilter", xForwardedForFilter)
-        .addMappingForUrlPatterns(null, true, "/*");
-
-    LogRequestFilter logRequestFilter = new LogRequestFilter();
-    servletContext.addFilter("logRequestFilter", logRequestFilter).addMappingForUrlPatterns(null,
-        true, "/*");
-
-    LowercaseRequestParamsFilter lowercaseRequestParamsFilter = new LowercaseRequestParamsFilter();
-    servletContext.addFilter("lowercaseRequestParamsFilter", lowercaseRequestParamsFilter)
-        .addMappingForUrlPatterns(null, true, "/*");
-
-    FilterRegistration.Dynamic corsFilter =
-        servletContext.addFilter("CORSFilter", CORSFilter.class);
-    corsFilter.addMappingForUrlPatterns(null, false, "/*");
+//    CustomHiddenHttpMethodFilter hiddenHttpMethodFilter = new CustomHiddenHttpMethodFilter();
+//    hiddenHttpMethodFilter.setMethodParam("action");
+//    servletContext.addFilter("hiddenHttpMethodFilter", hiddenHttpMethodFilter)
+//        .addMappingForUrlPatterns(null, true, "/*");
+//
+//    CustomClientAddressFilter xForwardedForFilter = new CustomClientAddressFilter();
+//    servletContext.addFilter("customXForwardedForFilter", xForwardedForFilter)
+//        .addMappingForUrlPatterns(null, true, "/*");
+//
+//    LogRequestFilter logRequestFilter = new LogRequestFilter();
+//    servletContext.addFilter("logRequestFilter", logRequestFilter).addMappingForUrlPatterns(null,
+//        true, "/*");
+//
+//    LowercaseRequestParamsFilter lowercaseRequestParamsFilter = new LowercaseRequestParamsFilter();
+//    servletContext.addFilter("lowercaseRequestParamsFilter", lowercaseRequestParamsFilter)
+//        .addMappingForUrlPatterns(null, true, "/*");
+//
+//    FilterRegistration.Dynamic corsFilter =
+//        servletContext.addFilter("CORSFilter", CORSFilter.class);
+//    corsFilter.addMappingForUrlPatterns(null, false, "/*");
 
     // Set Joda's DateTime default time zone to UTC
     DateTimeZone.setDefault(DateTimeZone.UTC);

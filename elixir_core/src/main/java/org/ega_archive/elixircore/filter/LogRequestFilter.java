@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -139,6 +140,30 @@ public class LogRequestFilter extends OncePerRequestFilter {
       @Override
       public int read() throws IOException {
         return stream.read();
+      }
+
+      
+      @Override
+      public boolean isFinished() {
+        try {
+          return stream.available() == 0 ? true : false;
+        } catch (IOException e) {
+          log.error(e);
+          return false;
+        }
+      }
+      
+
+      @Override
+      public boolean isReady() {
+        // TODO Auto-generated method stub
+        return false;
+      }
+
+      @Override
+      public void setReadListener(ReadListener readListener) {
+        // TODO Auto-generated method stub
+        
       }
     }
 
