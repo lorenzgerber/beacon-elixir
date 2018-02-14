@@ -56,7 +56,7 @@ psql -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql
 psql -d elixir_beacon_dev -U microaccounts_dev
 ```
 ```sql
-INSERT INTO beacon_dataset(id, description, access_type, reference_genome, size)
+INSERT INTO beacon_dataset_table(id, description, access_type, reference_genome, size)
   VALUES ('EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 34114);
 ```
 ```
