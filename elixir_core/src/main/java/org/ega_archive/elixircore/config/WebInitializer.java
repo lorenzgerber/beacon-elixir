@@ -3,7 +3,6 @@ package org.ega_archive.elixircore.config;
 import java.sql.Timestamp;
 import java.util.Arrays;
 
-import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -12,16 +11,14 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.ega_archive.elixircore.converter.CustomBeanUtilsBean;
 import org.ega_archive.elixircore.converter.DatetimeToTimestampConverter;
 import org.ega_archive.elixircore.converter.TimestampToDatetimeConverter;
-import org.ega_archive.elixircore.filter.CORSFilter;
 import org.ega_archive.elixircore.filter.CorrelationHeaderFilter;
 import org.ega_archive.elixircore.filter.CustomClientAddressFilter;
-import org.ega_archive.elixircore.filter.CustomHiddenHttpMethodFilter;
 import org.ega_archive.elixircore.filter.LogRequestFilter;
 import org.ega_archive.elixircore.filter.LowercaseRequestParamsFilter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.ServletContextInitializer;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,23 +30,24 @@ public class WebInitializer implements ServletContextInitializer {
     // This method adds a Filter to our Servlet so it "intercepts" the servlets calls
     // and if an action method is found, it translate the httpRequest from a get to the method
     // specified in the action parameter.
+    
 //    CustomHiddenHttpMethodFilter hiddenHttpMethodFilter = new CustomHiddenHttpMethodFilter();
 //    hiddenHttpMethodFilter.setMethodParam("action");
 //    servletContext.addFilter("hiddenHttpMethodFilter", hiddenHttpMethodFilter)
 //        .addMappingForUrlPatterns(null, true, "/*");
-//
-//    CustomClientAddressFilter xForwardedForFilter = new CustomClientAddressFilter();
-//    servletContext.addFilter("customXForwardedForFilter", xForwardedForFilter)
-//        .addMappingForUrlPatterns(null, true, "/*");
-//
-//    LogRequestFilter logRequestFilter = new LogRequestFilter();
-//    servletContext.addFilter("logRequestFilter", logRequestFilter).addMappingForUrlPatterns(null,
-//        true, "/*");
-//
-//    LowercaseRequestParamsFilter lowercaseRequestParamsFilter = new LowercaseRequestParamsFilter();
-//    servletContext.addFilter("lowercaseRequestParamsFilter", lowercaseRequestParamsFilter)
-//        .addMappingForUrlPatterns(null, true, "/*");
-//
+
+    CustomClientAddressFilter xForwardedForFilter = new CustomClientAddressFilter();
+    servletContext.addFilter("customXForwardedForFilter", xForwardedForFilter)
+        .addMappingForUrlPatterns(null, true, "/*");
+
+    LogRequestFilter logRequestFilter = new LogRequestFilter();
+    servletContext.addFilter("logRequestFilter", logRequestFilter).addMappingForUrlPatterns(null,
+        true, "/*");
+
+    LowercaseRequestParamsFilter lowercaseRequestParamsFilter = new LowercaseRequestParamsFilter();
+    servletContext.addFilter("lowercaseRequestParamsFilter", lowercaseRequestParamsFilter)
+        .addMappingForUrlPatterns(null, true, "/*");
+
 //    FilterRegistration.Dynamic corsFilter =
 //        servletContext.addFilter("CORSFilter", CORSFilter.class);
 //    corsFilter.addMappingForUrlPatterns(null, false, "/*");

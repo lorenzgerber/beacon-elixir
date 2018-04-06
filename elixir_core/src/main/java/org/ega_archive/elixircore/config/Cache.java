@@ -8,7 +8,9 @@ import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -19,44 +21,41 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class Cache implements CachingConfigurer {
-  
-  @Value("${service.cache.timeout}")
-  private int cacheTimeout;
-  
-  @Value("${service.cache.size}")
-  private int cacheSize;
 
-  @Bean
-  @Override
-  public CacheManager cacheManager() {
-    //Cache for saving the services urls
-    GuavaCacheManager cacheManager = new GuavaCacheManager("serviceURL");
-    cacheManager.setCacheBuilder(CacheBuilder.newBuilder().expireAfterWrite(cacheTimeout, TimeUnit.MINUTES)
-                                     .maximumSize(cacheSize));
-    return cacheManager;
+    @Value("${service.cache.timeout}")
+    private int cacheTimeout;
 
-    // SimpleCacheManager cacheManager = new SimpleCacheManager();
-    // cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("serviceURL")));
-    // return cacheManager;
-  }
+    @Value("${service.cache.size}")
+    private int cacheSize;
 
-  @Bean
-  @Override
-  public KeyGenerator keyGenerator() {
-    return new SimpleKeyGenerator();
-  }
+    @Bean
+    @Override
+    public CacheManager cacheManager() {
+        // Cache for saving the service urls
+        GuavaCacheManager cacheManager = new GuavaCacheManager("serviceURL", "serviceByVersionURL");
+        cacheManager.setCacheBuilder(
+                CacheBuilder.newBuilder().expireAfterWrite(cacheTimeout, TimeUnit.MINUTES).maximumSize(cacheSize));
+        return cacheManager;
 
-  
-  @Override
-  public CacheResolver cacheResolver() {
-    // TODO Auto-generated method stub
-    return null;
-  }
+        // SimpleCacheManager cacheManager = new SimpleCacheManager();
+        // cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("serviceURL")));
+        // return cacheManager;
+    }
 
-  @Override
-  public CacheErrorHandler errorHandler() {
-    // TODO Auto-generated method stub
-    return null;
-  }
+    @Bean
+    @Override
+    public KeyGenerator keyGenerator() {
+        return new SimpleKeyGenerator();
+    }
+
+    @Override
+    public CacheResolver cacheResolver() {
+      return new SimpleCacheResolver(cacheManager());
+    }
+
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new SimpleCacheErrorHandler();
+    }
 
 }

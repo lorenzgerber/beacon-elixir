@@ -15,14 +15,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.log4j.Log4j;
-
 import org.apache.commons.io.IOUtils;
 import org.ega_archive.elixircore.dto.auth.User;
 import org.ega_archive.elixircore.util.UserUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Log4j
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class LogRequestFilter extends OncePerRequestFilter {
 
   @Override
@@ -142,29 +142,23 @@ public class LogRequestFilter extends OncePerRequestFilter {
         return stream.read();
       }
 
-      
-      @Override
-      public boolean isFinished() {
-        try {
-          return stream.available() == 0 ? true : false;
-        } catch (IOException e) {
-          log.error(e);
-          return false;
+        @Override
+        public boolean isFinished() {
+            // TODO Auto-generated method stub
+            return false;
         }
-      }
-      
-
-      @Override
-      public boolean isReady() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-      @Override
-      public void setReadListener(ReadListener readListener) {
-        // TODO Auto-generated method stub
-        
-      }
+    
+        @Override
+        public boolean isReady() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    
+        @Override
+        public void setReadListener(ReadListener arg0) {
+            // TODO Auto-generated method stub
+            
+        }
     }
 
   }

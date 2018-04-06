@@ -3,7 +3,6 @@ package org.ega_archive.elixircore.controller;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.log4j.lf5.LogLevelFormatException;
 import org.ega_archive.elixircore.constant.CoreConstants;
 import org.ega_archive.elixircore.constant.ParamName;
 import org.ega_archive.elixircore.controller.interfaces.Instrumentation;
@@ -16,6 +15,7 @@ import org.ega_archive.elixircore.enums.CacheTypes;
 import org.ega_archive.elixircore.enums.ServiceAction;
 import org.ega_archive.elixircore.enums.Status;
 import org.ega_archive.elixircore.exception.NotImplementedException;
+import org.ega_archive.elixircore.exception.PreConditionFailed;
 import org.ega_archive.elixircore.service.AppService;
 import org.ega_archive.elixircore.service.LocatorService;
 import org.ega_archive.elixircore.service.LogService;
@@ -45,7 +45,7 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
 
   @Autowired
   private LocatorService locatorService;
-  
+
   // LOG
   @Override
   @RequestMapping(value = "/logs", method = RequestMethod.PUT)
@@ -53,10 +53,10 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
       @RequestParam(value = ParamName.LEVEL, required = true) String level) {
     try {
       logService.setLoglevel(level);
-    } catch (LogLevelFormatException e) {
+    } catch (PreConditionFailed e) {
       throw new RuntimeException(ERROR_LEVEL_NOT_EXISTS);
     }
-    return new Base<String>(level);
+    return new Base<>(level);
   }
 
   @Override
@@ -66,37 +66,37 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
       @RequestParam(value = "level", required = true) String level) {
     try {
       logService.setLoglevel(classname, level);
-    } catch (LogLevelFormatException e) {
+    } catch (PreConditionFailed e) {
       throw new RuntimeException(ERROR_LEVEL_NOT_EXISTS);
     }
-    return new Base<String>(level);
+    return new Base<>(level);
   }
 
   @Override
   @RequestMapping(value = "/logs/level", method = RequestMethod.GET)
   public Base<String> getLogLevel() {
-    return new Base<String>(logService.getLoglevel().toString());
+    return new Base<>(logService.getLoglevel().toString());
   }
 
   @Override
   @RequestMapping(value = "/logs/levels", method = RequestMethod.GET)
   public Base<String> getLogLevels() {
-    return new Base<String>(logService.getLoglevels().toString());
+    return new Base<>(logService.getLoglevels().toString());
   }
 
   // INSTRUMENTATION
   private Base<String> insStart() {
     appService.setStatus(Status.STARTED);
-    return new Base<String>(appService.getStatus().toString());
+    return new Base<>(appService.getStatus().toString());
   }
 
   private Base<String> insStop() {
     if (appService.getContext() == null) {
-      return new Base<String>("No Context to stop");
+      return new Base<>("No Context to stop");
     }
     try {
       appService.setStatus(Status.STOPPING);
-      return new Base<String>(Status.STOPPING.toString());
+      return new Base<>(Status.STOPPING.toString());
     } finally {
       new Thread(new Runnable() {
         @Override
@@ -114,7 +114,7 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
 
   private Base<String> insPause() {
     appService.setStatus(Status.PAUSED);
-    return new Base<String>(appService.getStatus().toString());
+    return new Base<>(appService.getStatus().toString());
   }
 
   private Base<String> insReload() {
@@ -124,13 +124,13 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
   @Override
   @RequestMapping(value = "/status", method = RequestMethod.GET)
   public Base<String> getStatus() {
-    return new Base<String>(appService.getStatus().toString());
+    return new Base<>(appService.getStatus().toString());
   }
 
   @Override
   @RequestMapping(value = "/status/states", method = RequestMethod.GET)
   public Base<String> getStatusStates() {
-    return new Base<String>(Arrays.asList(Status.values()).toString());
+    return new Base<>(Arrays.asList(Status.values()).toString());
   }
 
   @Override
@@ -155,23 +155,23 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
   @Override
   @RequestMapping(value = "/status/commands", method = RequestMethod.GET)
   public Base<ServiceAction> getCommands() {
-    return new Base<ServiceAction>(Arrays.asList(ServiceAction.values()));
+    return new Base<>(Arrays.asList(ServiceAction.values()));
   }
 
   @Override
   @RequestMapping(value = "/cache", method = RequestMethod.DELETE)
   public Base<String> deleteCache(@RequestParam(value = ParamName.CACHE_TYPE, required = true) String cacheName) {
     CacheTypes cacheNameParsed = CacheTypes.parse(cacheName);
-    switch(cacheNameParsed) {
+    switch (cacheNameParsed) {
       case SERVICE_LOCATION:
         locatorService.resetAllEntries();
         break;
       default:
         break;
     }
-    return new Base<String>(CoreConstants.OK);
+    return new Base<>(CoreConstants.OK);
   }
-  
+
   // EVENTS
   @Override
   @RequestMapping(value = "/events", method = RequestMethod.POST)
@@ -188,4 +188,12 @@ public abstract class BaseController implements Instrumentation, Metrics, Log, R
     throw new NotImplementedException(NOT_IMPLEMENTED);
   }
 
+//  @Override
+//  @RequestMapping(value = "/hello/{message}", method = RequestMethod.GET)
+//  public Base<String> hello(@PathVariable(value = "message") String message) {
+//    if (StringUtils.isBlank(message)) {
+//      message = "hello";
+//    }
+//    return new Base<>(String.valueOf(message.hashCode()));
+//  }
 }

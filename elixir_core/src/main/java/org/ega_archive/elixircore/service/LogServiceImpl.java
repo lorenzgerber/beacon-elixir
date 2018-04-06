@@ -1,20 +1,23 @@
 package org.ega_archive.elixircore.service;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.lf5.LogLevelFormatException;
-import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.extern.log4j.Log4j;
+import org.apache.commons.lang3.StringUtils;
+import org.ega_archive.elixircore.exception.PreConditionFailed;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-@Log4j
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class LogServiceImpl implements LogService {
 
-  private static final Logger loggerManager = Logger.getLogger("eu.crg.ega");
+  LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+  private static String mainLogger = "eu.crg.ega";
 
   private static String[]
       levels =
@@ -22,29 +25,29 @@ public class LogServiceImpl implements LogService {
 
   @Override
   public Level getLoglevel() {
-    return loggerManager.getLevel();
+    return loggerContext.getLogger(mainLogger).getLevel();
   }
 
   @Override
-  public void setLoglevel(String level) throws LogLevelFormatException {
+  public void setLoglevel(String level) {
     log.debug("Entering setLoglevel(" + level + ")");
     if (!Arrays.asList(levels).contains(level.toUpperCase())) {
-      throw new LogLevelFormatException("Level not correct");
+      throw new PreConditionFailed("Level not correct");
     }
-    loggerManager.setLevel(Level.toLevel(level));
+    loggerContext.getLogger(mainLogger).setLevel(Level.valueOf(level));
 
     log.debug("Exiting setLoglevel");
   }
 
   @Override
-  public void setLoglevel(String classname, String level) throws LogLevelFormatException {
-    if (level == null || level.isEmpty() || classname == null || classname.isEmpty()) {
-      throw new LogLevelFormatException("");
+  public void setLoglevel(String classname, String level) {
+    if (StringUtils.isBlank(level) || StringUtils.isBlank(classname)) {
+      throw new PreConditionFailed("");
     }
     if (!Arrays.asList(levels).contains(level.toUpperCase())) {
-      throw new LogLevelFormatException("Level not correct");
+      throw new PreConditionFailed("Level not correct");
     }
-    Logger.getLogger(classname.toLowerCase()).setLevel(Level.toLevel(level));
+    loggerContext.getLogger(classname.toLowerCase()).setLevel(Level.valueOf(level));
   }
 
   @SuppressWarnings("unchecked")

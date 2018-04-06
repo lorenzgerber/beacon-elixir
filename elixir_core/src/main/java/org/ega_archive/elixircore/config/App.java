@@ -19,6 +19,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 @Configuration
@@ -35,6 +36,7 @@ public class App {
     ObjectMapper objectMapper = new ObjectMapper();
     // This module serializes/deserializes DateTime values using the milliseconds form
     objectMapper.registerModule(new JodaModule());
+    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     return objectMapper;
   }
 
