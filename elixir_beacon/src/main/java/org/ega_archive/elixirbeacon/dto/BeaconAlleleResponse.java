@@ -35,8 +35,13 @@ public class BeaconAlleleResponse {
   
   // Allele request as interpreted by the beacon.
   private BeaconAlleleRequest alleleRequest;
-  
+
+  // Version of the API provided by the beacon.
+  private String apiVersion = BeaconConstants.API;
+
   // Indicator of whether the beacon has observed the allele.
+  // This should be non-null if `includeDatasetResponses` in the corresponding
+  // `BeaconAlleleRequest` is not `NONE`, and null otherwise.
   private List<DatasetAlleleResponse> datasetAlleleResponses;
   
   public void addDatasetAlleleResponse(DatasetAlleleResponse datasetAlleleResponse) {

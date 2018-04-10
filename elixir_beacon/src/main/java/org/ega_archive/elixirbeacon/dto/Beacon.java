@@ -20,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @NoArgsConstructor
 public class Beacon {
   
-  // Unique identifier of the beacon
+  // Unique identifier of the beacon. Use reverse domain name notation (e.g.
+  // org.ga4gh.beacon)
   private String id = BeaconConstants.BEACON_ID;
   
   // Name of the beacon
@@ -38,10 +39,11 @@ public class Beacon {
   //  Version of the beacon
   private String version = CoreConstants.API_VERSION;
   
-  // URL to the welcome page/UI for this beacon
+  // URL to the welcome page for this beacon (RFC 3986 format).
   private String welcomeUrl = BeaconConstants.BEACON_HOMEPAGE;
   
   // Alternative URL to the API, e.g. a restricted version of this beacon
+  // (RFC 3986 format).
   private String alternativeUrl = BeaconConstants.BEACON_ALTERNATIVE_URL;
   
   // The time the beacon was created (ISO 8601 format)

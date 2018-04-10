@@ -45,10 +45,8 @@ public class DatasetAlleleResponse {
   // Additional note or description of the response.
   private String note = CoreConstants.OK;
 
-  /*
-   * URL to an external system, such as a secured beacon or a system providing more information
-   * about a given allele.
-   */
+  // URL to an external system, such as a secured beacon or a system providing
+  // more information about a given allele (RFC 3986 format).
   private String externalUrl;
 
   // Additional structured metadata, key-value pairs

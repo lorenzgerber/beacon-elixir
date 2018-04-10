@@ -1,30 +1,35 @@
 package org.ega_archive.elixirbeacon.service;
 
+import static org.hamcrest.CoreMatchers.startsWith;
+
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.sql.DataSource;
 
 import org.ega_archive.elixirbeacon.Application;
 import org.ega_archive.elixirbeacon.constant.BeaconConstants;
 import org.ega_archive.elixirbeacon.dto.Beacon;
 import org.ega_archive.elixirbeacon.dto.BeaconAlleleResponse;
+import org.ega_archive.elixirbeacon.enums.ErrorCode;
+import org.ega_archive.elixirbeacon.enums.FilterDatasetResponse;
+import org.ega_archive.elixirbeacon.enums.VariantType;
 import org.ega_archive.elixircore.helper.CommonQuery;
 import org.ega_archive.elixircore.test.util.TestUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.github.springtestdbunit.TransactionDbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseOperation;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.github.springtestdbunit.annotation.DatabaseTearDown;
-import com.github.springtestdbunit.annotation.DbUnitConfiguration;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -32,281 +37,744 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class)
 @WebAppConfiguration
 @SpringBootTest("server.port:0")
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
-    TransactionDbUnitTestExecutionListener.class})
-@DbUnitConfiguration(databaseConnection = {"elixirbeaconDataSource"})
-@DatabaseSetup(value = {"/db/beacon_dataset_table.xml", "/db/beacon_data_table.xml"},
-    type = DatabaseOperation.CLEAN_INSERT)
-@DatabaseTearDown(value = {"/db/beacon_dataset_table.xml", "/db/beacon_data_table.xml"},
-    type = DatabaseOperation.DELETE_ALL)
 public class ElixirBeaconServiceTest {
-  
+
   private static final CommonQuery COMMON_QUERY = CommonQuery.builder().skip(0).limit(0).build();
 
   @Autowired
   private ElixirBeaconService elixirBeaconService;
-  
+
+  @Resource(name = "elixirbeaconDataSource")
+  private DataSource dataSource;
+
   @Before
-  public void setUp() {
+  public void setUp() throws SQLException {
     TestUtils.removeUserFromContext();
+
+    // Truncate + Insert
+    TestUtils.populateDatabase(dataSource, 
+        "/db/truncate_tables.sql", 
+        // Beacon
+        "/db/beacon_dataset_table.sql", 
+        "/db/beacon_data_table.sql", 
+        // CC
+        "/db/consent_code_category_table.sql",
+        "/db/consent_code_table.sql",
+        // Beacon->CC
+        "/db/beacon_dataset_consent_code_table.sql");
   }
-  
+
+  @After
+  public void tearDown() throws SQLException {
+//    TestUtils.populateDatabase(dataSource, "/db/truncate_tables.sql");
+  }
+
   @Test
   public void listDatasets() throws Exception {
     // Mock 3 calls to that method
     Beacon allowedDatasets = elixirBeaconService.listDatasets(COMMON_QUERY, null);
-    
+
     assertThat(allowedDatasets.getDatasets().size(), equalTo(5));
     int i = 0;
     assertThat(allowedDatasets.getDatasets().get(i).getId(), equalTo("EGAD00000000001"));
+
     assertThat(allowedDatasets.getDatasets().get(i).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(true)));//public
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getPrimaryCategory(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getSecondaryCategories().size(), equalTo(1));
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getRequirements().size(), equalTo(0));
     i++;
     assertThat(allowedDatasets.getDatasets().get(1).getId(), equalTo("EGAD00000000002"));
-    assertThat(allowedDatasets.getDatasets().get(1).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(false)));//registered
+    assertThat(allowedDatasets.getDatasets().get(1).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(false)));// registered
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getPrimaryCategory(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getSecondaryCategories().size(), equalTo(2));
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getRequirements().size(), equalTo(0));
     i++;
     assertThat(allowedDatasets.getDatasets().get(2).getId(), equalTo("EGAD00000000003"));
-    assertThat(allowedDatasets.getDatasets().get(2).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(false)));//protected
+    assertThat(allowedDatasets.getDatasets().get(2).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(false)));// protected
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getPrimaryCategory(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getSecondaryCategories().size(), equalTo(0));
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getRequirements().size(), equalTo(0));
     i++;
     assertThat(allowedDatasets.getDatasets().get(3).getId(), equalTo("EGAD00000000004"));
-    assertThat(allowedDatasets.getDatasets().get(3).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(true)));//public
+    assertThat(allowedDatasets.getDatasets().get(3).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(true)));// public
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getPrimaryCategory(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getSecondaryCategories().size(), equalTo(1));
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getRequirements().size(), equalTo(1));
     i++;
     assertThat(allowedDatasets.getDatasets().get(4).getId(), equalTo("EGAD00000000005"));
-    assertThat(allowedDatasets.getDatasets().get(4).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(true)));//public
+    assertThat(allowedDatasets.getDatasets().get(4).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(true)));// public
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getPrimaryCategory(), notNullValue());
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getSecondaryCategories().size(), equalTo(1));
+    assertThat(allowedDatasets.getDatasets().get(i).getDataUseConditions().getConsentCodedataUse().getRequirements().size(), equalTo(2));
   }
-  
+
   @Test
   public void listDatasetsByReferenceGenome() throws Exception {
     Beacon allowedDatasets = elixirBeaconService.listDatasets(COMMON_QUERY, "grch37");
 
     assertThat(allowedDatasets.getDatasets().size(), equalTo(3));
     assertThat(allowedDatasets.getDatasets().get(0).getId(), equalTo("EGAD00000000001"));
-    assertThat(allowedDatasets.getDatasets().get(0).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(true)));//public
+    assertThat(allowedDatasets.getDatasets().get(0).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(true)));// public
     assertThat(allowedDatasets.getDatasets().get(1).getId(), equalTo("EGAD00000000002"));
-    assertThat(allowedDatasets.getDatasets().get(1).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(false)));//registered
+    assertThat(allowedDatasets.getDatasets().get(1).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(false)));// registered
     assertThat(allowedDatasets.getDatasets().get(2).getId(), equalTo("EGAD00000000005"));
-    assertThat(allowedDatasets.getDatasets().get(2).getInfo().get(BeaconConstants.AUTHORIZED), equalTo(Boolean.toString(true)));//public
-  }
-  
-  @Test
-  public void checkParamPositionAndStartMissing() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, null, null, "12", null, "grch37");
-
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+    assertThat(allowedDatasets.getDatasets().get(2).getInfo().get(BeaconConstants.AUTHORIZED),
+        equalTo(Boolean.toString(true)));// public
   }
   
   @Test
   public void checkParamChromosomeMissing() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, null, null, "", 429, "grch37");
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = null;
+    String referenceBases = null;
+    String alternateBases = null;
 
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("'referenceName' and/or 'assemblyId' are required"));
   }
-  
+
   @Test
   public void checkParamReferenceGenomeMissing() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, null, null, "12", 429, null);
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = 1111;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = null;
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
 
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("'referenceName' and/or 'assemblyId' are required"));
   }
   
   @Test
-  public void checkDatasetParamNotFound() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, Arrays.asList("invented dataset"), "", null, "1", 1234, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.NOT_FOUND.value()));
-  }
-  
-  @Test
-  public void checkDatasetParamUnauthenticatedUser() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, Arrays.asList("EGAD00000000002"), "", null, "1", 1234, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.UNAUTHORIZED.value()));
-  }
-  
-  @Test
-  public void checkDatasetParamUnauthorizedAnonymousUser() throws Exception {
-    String datasetStableId = "EGAD00000000003";
+  public void checkParamAlternateBasesAndVariantTypeMissing() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = 1111;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
 
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, Arrays.asList(datasetStableId), "", null, "1", 1234, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.UNAUTHORIZED.value()));
-  }
-  
-  @Test
-  public void checkReferenceGenomeParamMatchesDataset() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, Arrays.asList("EGAD00000000001"), "", null, "1", 1234, "GRCh38");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("Either 'alternateBases' or 'variantType' is required"));
   }
 
   @Test
-  public void checkAlternateBasesParamNotValid1() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, "R", null, "13", 1, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
-  }
+  public void checkParamStartMissingWhenEndProvided() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = 1111;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
 
-  @Test
-  public void checkAlternateBasesParamNotValid2() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, "DA", null, "13", 1, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(), equalTo("'start' is required if 'end' is provided"));
   }
   
   @Test
-  public void checkReferenceBasesParamNotValid1() {
-    BeaconAlleleResponse response = new BeaconAlleleResponse();
-    elixirBeaconService.checkParams(response, null, null, "P", "13", 1, "GRCh37");
-    
-    assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.PRECONDITION_FAILED.value()));
+  public void checkParamStartMissing() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(), equalTo(
+        "Either 'start' or all of 'startMin', 'startMax', 'endMin' and 'endMax' are required"));
   }
 
   @Test
-  public void queryOneDataset() throws Exception {
-    
-    // Query without detailed response by dataset
-    boolean includeDatasetResponses = false;
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000001"), "A", null, "X", 1,
-            "GRCh37", includeDatasetResponses);
+  public void checkParamSomeStartXXXOrEndXXMissing() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = 1111;
+    Integer startMax = 1112;
+    Integer end = null;
+    Integer endMin = 2222;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("All of 'startMin', 'startMax', 'endMin' and 'endMax' are required"));
+  }
+
+  @Test
+  public void checkParamStartProvidedAndReferenceBasesAndEndMissing() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("'referenceBases' is required if 'start' is provided and 'end' is missing"));
+  }
+  
+  @Test
+  public void checkParamStartStartMinStartMaxEndMinEndMaxProvided() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = 1111;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = null;
+    String alternateBases = null;
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("'start' cannot be provided at the same time as 'startMin', 'startMax', 'endMin' and 'endMax'"));
+  }
+
+  @Test
+  public void checkParamDatasetFound() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("this ID does not exist");
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = "A";
+    String alternateBases = "AC";
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.NOT_FOUND));
+    assertThat(result.getError().getMessage(), equalTo("Dataset not found"));
+  }
+
+  @Test
+  public void checkParamDatasetUnauthenticatedUser() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("EGAD00000000003");
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = "A";
+    String alternateBases = "AC";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.UNAUTHORIZED));
+    assertThat(result.getError().getMessage(),
+        equalTo("Unauthenticated users cannot access this dataset"));
+  }
+
+  @Test
+  public void checkParamReferenceGenomeDoesNotMatchDataset() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("EGAD00000000001");
+    String referenceGenome = "grch38";
+    String chromosome = "12";
+    String referenceBases = "A";
+    String alternateBases = "AC";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("The reference genome of this dataset ("));
+  }
+
+  @Test
+  public void checkParamAlternateBasesNotValid() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("EGAD00000000001");
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = "A";
+    String alternateBases = "AR";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|(.){1}"));
+
+    result = new BeaconAlleleResponse();
+    alternateBases = "A";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
+
+    result = new BeaconAlleleResponse();
+    alternateBases = ".";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
+
+    result = new BeaconAlleleResponse();
+    alternateBases = "..";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|(.){1}"));
+  }
+
+  @Test
+  public void checkReferenceBasesParamNotValid() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("EGAD00000000001");
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = "R";
+    String alternateBases = "C";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+"));
+
+    result = new BeaconAlleleResponse();
+    referenceBases = "AT";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
+
+    result = new BeaconAlleleResponse();
+    referenceBases = ".";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+"));
+  }
+
+  @Test
+  public void queryForSNPs() throws Exception {
+    String datasetStableId = "EGAD00000000001";
+    String variantType = null;
+    Integer start = 14929;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList(datasetStableId);
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "A";
+    String alternateBases = "G";
+    String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+
+    // Query with positive answer WITHOUT detailed response by dataset
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+    assertThat(response.getApiVersion(), equalTo("0.4"));
+    assertThat(response.getAlleleRequest(), notNullValue());
+
+    includeDatasetResponses = FilterDatasetResponse.ALL.toString();
+    // Query with positive answer AND detailed response by dataset
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo(datasetStableId));
+    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
+
+    includeDatasetResponses = FilterDatasetResponse.HIT.toString();
+    // Query with positive answer AND detailed response by dataset
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo(datasetStableId));
+    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
+
+    includeDatasetResponses = FilterDatasetResponse.MISS.toString();
+    // Query with positive answer AND detailed response by dataset
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
 
     assertThat(response.isExists(), equalTo(true));
     assertThat(response.getDatasetAlleleResponses(), nullValue());
 
-    includeDatasetResponses = true;
-    // Query with positive answer
-    response =
-        elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000001"), "A", null, "X", 1,
-            "GRCh37", includeDatasetResponses);
-
-    assertThat(response.isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(), equalTo("EGAD00000000001"));
-    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
-
-    // Query with negative answer
-    response =
-        elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000001"), "A", null, "X", 11111,
-            "GRCh37", includeDatasetResponses);
+    alternateBases = "T";
+    // Query with negative answer AND detailed response by dataset
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
 
     assertThat(response.isExists(), equalTo(false));
-    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(), equalTo("EGAD00000000001"));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo(datasetStableId));
+    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(false));
+
+
+    includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+    // Query with negative answer WITHOUT detailed response by dataset
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(false));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+
+    includeDatasetResponses = FilterDatasetResponse.HIT.toString();
+    // Query with negative answer AND detailed response by dataset if HIT
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(false));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+
+    includeDatasetResponses = FilterDatasetResponse.MISS.toString();
+    // Query with negative answer AND detailed response by dataset if MISS
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(false));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo(datasetStableId));
     assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(false));
   }
   
+  @Test
+  public void queryForDUPs() throws Exception {
+    String datasetStableId = "EGAD00000000001";
+    String variantType = VariantType.DUPLICATION.getType();
+    Integer start = null;
+    Integer startMin = 22332113;
+    Integer startMax = 22332113;
+    Integer end = null;
+    Integer endMin = 16913869;
+    Integer endMax = 16913869;
+    List<String> datasetStableIds = Arrays.asList(datasetStableId);
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "TG";
+    String alternateBases = null;
+    String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+
+    // Query with positive answer WITHOUT detailed response by dataset
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+    
+    start = 22332113; 
+    startMin = null;
+    startMax = null;
+    endMin = null;
+    endMax = null;
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+  }
+
   @Test
   public void queryMultipleDatasets() throws Exception {
-    // Include detailed response per dataset
-    boolean includeDatasetResponses = true;
-    
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000001", "EGAD00000000005"), "A", null, "X", 1, "GRCh37", includeDatasetResponses);
+    String variantType = null;
+    Integer start = 14929;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList("EGAD00000000001", "EGAD00000000005");
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "A";
+    String alternateBases = "G";
+    String includeDatasetResponses = FilterDatasetResponse.ALL.toString();
+
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
 
     assertThat(response.isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(), equalTo("EGAD00000000001"));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo("EGAD00000000001"));
     assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses().get(1).getDatasetId(), equalTo("EGAD00000000005"));
+    assertThat(response.getDatasetAlleleResponses().get(1).getDatasetId(),
+        equalTo("EGAD00000000005"));
     assertThat(response.getDatasetAlleleResponses().get(1).isExists(), equalTo(false));
-    
+
     // Don't include detailed response per dataset
-    includeDatasetResponses = false;
-    response =
-        elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000001", "EGAD00000000005"), "A", null, "X", 1, "GRCh37", includeDatasetResponses);
+    includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
     assertThat(response.isExists(), equalTo(true));
     assertThat(response.getDatasetAlleleResponses(), nullValue());
-  }
-  
-  @Test
-  public void queryAllDatasetAndGetAPositiveAnswer() throws Exception {
-    // Include detailed response per dataset
-    boolean includeDatasetResponses = true;
-    
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(null, "A", "C", "X", 1, "GRCh37", includeDatasetResponses);
 
+    // Just return "true" datasets
+    includeDatasetResponses = FilterDatasetResponse.HIT.toString();
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
     assertThat(response.isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(), equalTo("EGAD00000000001"));
+    assertThat(response.getDatasetAlleleResponses().size(), equalTo(1));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo("EGAD00000000001"));
     assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses().get(1).getDatasetId(), equalTo("EGAD00000000005"));
-    assertThat(response.getDatasetAlleleResponses().get(1).isExists(), equalTo(false));
-    
-    // Don't include detailed response per dataset
-    includeDatasetResponses = false;
-    response =
-        elixirBeaconService.queryBeacon(null, "A", "C", "X", 1, "GRCh37", includeDatasetResponses);
 
+    // Just return "false" datasets
+    includeDatasetResponses = FilterDatasetResponse.MISS.toString();
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
     assertThat(response.isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses(), nullValue());
-  }
-  
-  @Test
-  public void queryAllDatasetAndGetANegativeAnswer() throws Exception {
- // Include detailed response per dataset
-    boolean includeDatasetResponses = true;
-    
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(null, "T", null, "12", 1, "GRCh37", includeDatasetResponses);
-    
-    assertThat(response.isExists(), equalTo(false));
-    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(), equalTo("EGAD00000000001"));
+    assertThat(response.getDatasetAlleleResponses().size(), equalTo(1));
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo("EGAD00000000005"));
     assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(false));
-    assertThat(response.getDatasetAlleleResponses().get(1).getDatasetId(), equalTo("EGAD00000000005"));
-    assertThat(response.getDatasetAlleleResponses().get(1).isExists(), equalTo(false));
-
-    // Don't include detailed response per dataset
-    includeDatasetResponses = false;
-    response =
-        elixirBeaconService.queryBeacon(null, "T", null, "12", 1, "GRCh37", includeDatasetResponses);
-    
-    assertThat(response.isExists(), equalTo(false));
-    assertThat(response.getDatasetAlleleResponses(), nullValue());
   }
-  
+
   @Test
   public void queryAllDatasetPassingEmptyString() throws Exception {
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(Arrays.asList(""), null, null, "X", 1, "GRCh37", false);
+    String variantType = null;
+    Integer start = 14929;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "A";
+    String alternateBases = "G";
+    String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
 
     assertThat(response.isExists(), equalTo(true));
     assertThat(response.getDatasetAlleleResponses(), nullValue());
-  }
-  
-  @Test
-  public void queryAllDatasetPassingEmptyArray() throws Exception {
-    BeaconAlleleResponse response =
-        elixirBeaconService.queryBeacon(Arrays.asList(), null, null, "X", 1, "GRCh37", false);
+    
+    // Get only HITS
+    includeDatasetResponses = FilterDatasetResponse.HIT.toString();
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
 
     assertThat(response.isExists(), equalTo(true));
-    assertThat(response.getDatasetAlleleResponses(), nullValue());
+    assertThat(response.getDatasetAlleleResponses(), notNullValue());
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo("EGAD00000000001"));
+    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
+
+    // Get only MISSES
+    includeDatasetResponses = FilterDatasetResponse.MISS.toString();
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType, alternateBases,
+        referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome,
+        includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true)); // Global is true
+    assertThat(response.getDatasetAlleleResponses(), notNullValue());
+    assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
+        equalTo("EGAD00000000005"));
+    assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(false));
   }
 
   @Test
   public void queryControlledDatasetByUnauthenticatedUser() throws Exception {
-    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(Arrays.asList("EGAD00000000002"), "A", null, "X", 1, "GRCh37", false);
+    String datasetStableId = "EGAD00000000002";
+    String variantType = null;
+    Integer start = 14929;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = null;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = Arrays.asList(datasetStableId);
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "A";
+    String alternateBases = "G";
+    String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+
+    // Query with positive answer WITHOUT detailed response by dataset
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
     
     assertThat(response.getError(), notNullValue());
-    assertThat(response.getError().getErrorCode(), equalTo(HttpStatus.UNAUTHORIZED.value()));
+    assertThat(response.getError().getErrorCode(), equalTo(ErrorCode.UNAUTHORIZED));
   }
-  
+
 }

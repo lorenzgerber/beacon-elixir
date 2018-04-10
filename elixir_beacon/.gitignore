@@ -66,3 +66,6 @@ build.commit
 
 #JPA project
 persistence.xml
+
+#ignore logs folder
+/logs

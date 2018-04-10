@@ -10,11 +10,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BeaconDatasetRepository extends CustomQuerydslJpaRepository<BeaconDataset, String> {
+public interface BeaconDatasetRepository extends CustomQuerydslJpaRepository<BeaconDataset, Integer> {
   
   public Page<BeaconDataset> findByReferenceGenome(String referenceGenome, Pageable page);
   
-  @Query("SELECT d.id FROM BeaconDataset d WHERE d.referenceGenome=?1 AND d.accessType=?2 ORDER BY d.id")
-  public List<String> findByReferenceGenomeAndAccessType(String referenceGenome, String accessType);
+  public BeaconDataset findByStableId(String stableId);
   
+  @Query("SELECT d.id FROM BeaconDataset d WHERE d.accessType=?1 ORDER BY d.id")
+  public List<Integer> findByAccessType(String accessType);
+  
+  @Query("SELECT d.id FROM BeaconDataset d WHERE d.referenceGenome=?1 AND d.accessType=?2 ORDER BY d.id")
+  public List<Integer> findByReferenceGenomeAndAccessType(String referenceGenome, String accessType);
+
 }

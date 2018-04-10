@@ -1,20 +1,21 @@
 #properties
 #sample #1
 querySamples:
-  assembly-id-1: GRCh37
-  position-1: 6689
-  reference-name-1: 17
-  alternate-bases-1: 
-  dataset-ids-1: 
+  assemblyId1: GRCh37
+  position1: 6689
+  referenceName1: 17
+  alternateBases1: 
+  datasetIds1: 
 #sample #2
-  assembly-id-2: GRCh37
-  position-2: 1040026
-  reference-name-2: 1
-  alternate-bases-2: 
-  dataset-ids-2: EGAD00001000740,EGAD00001000741
+  assemblyId2: GRCh37
+  position2: 1040026
+  referenceName2: 1
+  alternateBases2: 
+  datasetIds2: EGAD00001000740,EGAD00001000741
 #sample #3
-  assembly-id-3: GRCh37
-  position-3: 1040026
-  reference-name-3: 1
-  alternate-bases-3: C
-  dataset-ids-3: EGAD00001000740
+  assemblyId3: GRCh37
+  position3: 1040026
+  referenceName3: 1
+  alternateBases3: C
+  datasetIds3: EGAD00001000740
+
