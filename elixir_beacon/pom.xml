@@ -5,7 +5,7 @@
 
 	<groupId>org.ega_archive</groupId>
 	<artifactId>elixir-beacon</artifactId>
-	<version>0.3</version>
+	<version>0.4</version>
 	<packaging>jar</packaging>
 
 	<name>elixir-beacon</name>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>org.ega_archive</groupId>
 			<artifactId>elixir-core</artifactId>
-			<version>beacon_api_v0.3-SNAPSHOT</version>
+			<version>beacon_api_v0.4-SNAPSHOT</version>
 		</dependency>
 		<!-- End internal dependencies -->
 
