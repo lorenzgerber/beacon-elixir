@@ -28,18 +28,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class)
 @WebAppConfiguration
@@ -543,6 +537,10 @@ public class ElixirBeaconServiceTest {
     assertThat(response.getDatasetAlleleResponses().get(0).getDatasetId(),
         equalTo(datasetStableId));
     assertThat(response.getDatasetAlleleResponses().get(0).isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses().get(0).getCallCount(), notNullValue());
+    assertThat(response.getDatasetAlleleResponses().get(0).getVariantCount(), notNullValue());
+    assertThat(response.getDatasetAlleleResponses().get(0).getSampleCount(), notNullValue());
+    assertThat(response.getDatasetAlleleResponses().get(0).getFrequency(), notNullValue());
 
     includeDatasetResponses = FilterDatasetResponse.HIT.toString();
     // Query with positive answer AND detailed response by dataset

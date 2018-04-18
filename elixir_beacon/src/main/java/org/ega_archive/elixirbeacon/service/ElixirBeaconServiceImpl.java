@@ -324,7 +324,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         BeaconDataset dataset = beaconDatasetRepository.findOne(data.getDatasetId());
         datasetResponse.setDatasetId(dataset.getStableId());
         datasetResponse.setExists(true);
-        datasetResponse.setFrequency(null);//TODO
+        datasetResponse.setFrequency(data.getFrequency());
         datasetResponse
             .setVariantCount(data.getVariantCnt() != null ? (long) data.getVariantCnt() : null);
         datasetResponse.setCallCount(data.getCallCnt() != null ? (long) data.getCallCnt() : null);

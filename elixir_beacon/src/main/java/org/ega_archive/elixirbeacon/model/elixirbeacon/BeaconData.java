@@ -73,5 +73,7 @@ public class BeaconData implements Serializable {
 
   @Column(name = "variant_cnt")
   private Integer variantCnt;
+  
+  private Double frequency;
 
 }

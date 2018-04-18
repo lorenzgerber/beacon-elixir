@@ -5,9 +5,9 @@ import java.util.Map;
 import org.ega_archive.elixircore.constant.CoreConstants;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Builder;
 
 @Data
 @Builder
