@@ -134,12 +134,12 @@ BEGIN
 	_query = _query || ' bdat.chromosome=$3 AND';
 
 	--Reference parameter is not mandatory
-	IF _reference_bases IS NOT NULL THEN 
+	IF _reference_bases IS NOT NULL AND _reference_bases!='N' THEN 
 		_query=_query || ' bdat.reference=$4 AND';
 	END IF;	
 
 	--Alternate
-	IF _alternate_bases IS NOT NULL THEN 
+	IF _alternate_bases IS NOT NULL AND _alternate_bases!='N' THEN 
 		_query = _query || ' bdat.alternate=$5 AND';
 	END IF;
 	IF _variant_type='INS' AND _alternate_bases IS NOT NULL THEN 

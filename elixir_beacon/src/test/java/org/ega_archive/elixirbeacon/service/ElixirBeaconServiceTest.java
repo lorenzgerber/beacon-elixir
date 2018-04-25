@@ -147,7 +147,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = null;
-    String referenceBases = null;
+    String referenceBases = "C";
     String alternateBases = null;
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
@@ -156,7 +156,7 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        equalTo("'referenceName' and/or 'assemblyId' are required"));
+        equalTo("All 'referenceName', 'referenceBases' and/or 'assemblyId' are required"));
   }
 
   @Test
@@ -172,6 +172,31 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = null;
     String chromosome = "12";
+    String referenceBases = "C";
+    String alternateBases = null;
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("All 'referenceName', 'referenceBases' and/or 'assemblyId' are required"));
+  }
+  
+  @Test
+  public void checkParamReferenceBasesMissing() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = null;
+    Integer start = null;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = 1111;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
     String referenceBases = null;
     String alternateBases = null;
 
@@ -181,7 +206,7 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        equalTo("'referenceName' and/or 'assemblyId' are required"));
+        equalTo("All 'referenceName', 'referenceBases' and/or 'assemblyId' are required"));
   }
   
   @Test
@@ -197,7 +222,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "C";
     String alternateBases = null;
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
@@ -207,6 +232,47 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
         equalTo("Either 'alternateBases' or 'variantType' is required"));
+  }
+  
+  @Test
+  public void checkParamAlternateBasesAndVariantTypeProvided() {
+    BeaconAlleleResponse result = new BeaconAlleleResponse();
+    VariantType type = VariantType.DELELETION;
+    Integer start = 1111;
+    Integer startMin = null;
+    Integer startMax = null;
+    Integer end = 1111;
+    Integer endMin = null;
+    Integer endMax = null;
+    List<String> datasetStableIds = null;
+    String referenceGenome = "grch37";
+    String chromosome = "12";
+    String referenceBases = "C";
+    String alternateBases = "A";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        equalTo("If 'variantType' is provided then 'alternateBases' must be empty or equal to 'N'"));
+    
+    result = new BeaconAlleleResponse();
+    alternateBases = "N";
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
+    
+    result = new BeaconAlleleResponse();
+    alternateBases = null;
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
   }
 
   @Test
@@ -222,7 +288,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "N";
     String alternateBases = null;
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
@@ -246,7 +312,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "C";
     String alternateBases = null;
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
@@ -259,7 +325,7 @@ public class ElixirBeaconServiceTest {
   }
 
   @Test
-  public void checkParamSomeStartXXXOrEndXXMissing() {
+  public void checkParamSomeStartXXOrEndXXMissing() {
     BeaconAlleleResponse result = new BeaconAlleleResponse();
     VariantType type = null;
     Integer start = null;
@@ -271,7 +337,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "C";
     String alternateBases = null;
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
@@ -284,7 +350,7 @@ public class ElixirBeaconServiceTest {
   }
 
   @Test
-  public void checkParamStartProvidedAndReferenceBasesAndEndMissing() {
+  public void checkParamStartProvidedAndEndMissing() {
     BeaconAlleleResponse result = new BeaconAlleleResponse();
     VariantType type = null;
     Integer start = 1111;
@@ -296,7 +362,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "N";
     String alternateBases = null;
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
         chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
@@ -304,7 +370,7 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        equalTo("'referenceBases' is required if 'start' is provided and 'end' is missing"));
+        equalTo("'referenceBases' cannot be 'N' if 'start' is provided and 'end' is missing"));
   }
   
   @Test
@@ -320,7 +386,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "12";
-    String referenceBases = null;
+    String referenceBases = "C";
     String alternateBases = null;
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
         chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
@@ -426,7 +492,7 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|(.){1}"));
+        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|N"));
 
     result = new BeaconAlleleResponse();
     alternateBases = "A";
@@ -442,18 +508,18 @@ public class ElixirBeaconServiceTest {
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
         chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
 
-    assertThat(result.getError(), nullValue());
-
+    assertThat(result.getError(), notNullValue());
+    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
+    assertThat(result.getError().getMessage(),
+        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|N"));
+    
     result = new BeaconAlleleResponse();
-    alternateBases = "..";
+    alternateBases = "N";
 
     elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
         chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
 
-    assertThat(result.getError(), notNullValue());
-    assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
-    assertThat(result.getError().getMessage(),
-        startsWith("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|(.){1}"));
+    assertThat(result.getError(), nullValue());
   }
 
   @Test
@@ -478,7 +544,7 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+"));
+        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+|N"));
 
     result = new BeaconAlleleResponse();
     referenceBases = "AT";
@@ -497,7 +563,16 @@ public class ElixirBeaconServiceTest {
     assertThat(result.getError(), notNullValue());
     assertThat(result.getError().getErrorCode(), equalTo(ErrorCode.GENERIC_ERROR));
     assertThat(result.getError().getMessage(),
-        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+"));
+        startsWith("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+|N"));
+    
+    result = new BeaconAlleleResponse();
+    referenceBases = "N";
+    end = 123;
+
+    elixirBeaconService.checkParams(result, datasetStableIds, type, alternateBases, referenceBases,
+        chromosome, start, startMin, startMax, end, endMin, endMax, referenceGenome);
+
+    assertThat(result.getError(), nullValue());
   }
 
   @Test

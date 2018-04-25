@@ -174,10 +174,10 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
 
     List<Integer> datasetIds = new ArrayList<Integer>();
 
-    if (StringUtils.isBlank(chromosome) || StringUtils.isBlank(referenceGenome)) {
+    if (StringUtils.isBlank(chromosome) || StringUtils.isBlank(referenceGenome) || StringUtils.isBlank(referenceBases)) {
       Error error = Error.builder()
           .errorCode(ErrorCode.GENERIC_ERROR)
-          .message("'referenceName' and/or 'assemblyId' are required")
+          .message("All 'referenceName', 'referenceBases' and/or 'assemblyId' are required")
           .build();
       result.setError(error);
       return datasetIds;
@@ -189,6 +189,14 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
           .message("Either 'alternateBases' or 'variantType' is required")
           .build();
       result.setError(error);
+    } else if (type != null && StringUtils.isNotBlank(alternateBases)
+        && !StringUtils.equalsIgnoreCase(alternateBases, "N")) {
+      Error error = Error.builder().errorCode(ErrorCode.GENERIC_ERROR)
+          .message(
+              "If 'variantType' is provided then 'alternateBases' must be empty or equal to 'N'")
+          .build();
+      result.setError(error);
+      return datasetIds;
     }
     
     if (start == null) {
@@ -221,10 +229,10 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
           .build();
       result.setError(error);
       return datasetIds;
-    } else if (end == null && StringUtils.isBlank(referenceBases)) {
+    } else if (end == null && StringUtils.equalsIgnoreCase(referenceBases, "N")) {
       Error error = Error.builder()
           .errorCode(ErrorCode.GENERIC_ERROR)
-          .message("'referenceBases' is required if 'start' is provided and 'end' is missing")
+          .message("'referenceBases' cannot be 'N' if 'start' is provided and 'end' is missing")
           .build();
       result.setError(error);
       return datasetIds;
@@ -275,20 +283,20 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
     }
     // Allele has a valid value
     if (StringUtils.isNotBlank(alternateBases)) {
-      boolean matches = Pattern.matches("[ACTG]+|(\\.){1}", alternateBases);
+      boolean matches = Pattern.matches("[ACTG]+|N", alternateBases);
       if (!matches) {
         Error error = Error.builder().errorCode(ErrorCode.GENERIC_ERROR)
-            .message("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|(.){1}")
+            .message("Invalid 'alternateBases' parameter, it must match the pattern [ACTG]+|N")
             .build();
         result.setError(error);
         return datasetIds;
       }
     }
     if (StringUtils.isNotBlank(referenceBases)) {
-      boolean matches = Pattern.matches("[ACTG]+", referenceBases);
+      boolean matches = Pattern.matches("[ACTG]+|N", referenceBases);
       if (!matches) {
         Error error = Error.builder().errorCode(ErrorCode.GENERIC_ERROR)
-            .message("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+").build();
+            .message("Invalid 'referenceBases' parameter, it must match the pattern [ACTG]+|N").build();
         result.setError(error);
         return datasetIds;
       }
