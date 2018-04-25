@@ -99,8 +99,8 @@ java -jar target/elixir-beacon-0.4.jar --spring.profiles.active=dev
   NOTE: You will need a user with enough permissions to create databases.
 
 * Create two databases. Default names are:
-    * **elixir_beacon_dev**: this is the main database that will be used by the application.
-    * **elixir_beacon_testing**: this is a secondary database that will be used to run the tests.
+    * `elixir_beacon_dev`: this is the main database that will be used by the application.
+    * `elixir_beacon_testing`: this is a secondary database that will be used to run the tests.
   ```sql
   CREATE DATABASE elixir_beacon_dev;
   CREATE DATABASE elixir_beacon_testing;
@@ -154,18 +154,18 @@ java -jar target/elixir-beacon-0.4.jar --spring.profiles.active=dev
   psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function.sql
   ```
 ## Load the data
-1. Download the [script](https://raw.githubusercontent.com/elixirhub/human-data-beacon/v0.4/elixir_beacon/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
+* Download the [script](https://raw.githubusercontent.com/elixirhub/human-data-beacon/v0.4/elixir_beacon/src/main/resources/META-INF/vcf_parser.sh) to parse VCF files and give it executable rights:
   ```
   wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/v0.4/elixir_beacon/src/main/resources/META-INF/vcf_parser.sh
   chmod +x vcf_parser.sh
   ```
-1. Run this script executing:
+* Run this script executing:
   ```
   ./vcf_parser.sh dataset_id < file.vcf
   ```
   This script will generate 2 output files: `dataset_id_filename.SNPs` and `dataset_id_filename.samples`.
 
-1. Load the dataset information into `beacon_dataset_table`:
+* Load the dataset information into `beacon_dataset_table`:
   ```sql
   INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)
     VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 1, 1, 1);
@@ -173,13 +173,13 @@ java -jar target/elixir-beacon-0.4.jar --spring.profiles.active=dev
   Initialize the row setting `variant_cnt`, `call_cnt` and `sample_cnt` to 1. After loading the data, count and set the real counts.
   Remember to replace the values in the previous command with the correct ones. Use lower case in the `reference_genome` field.
 
-1. Load the generated file into `beacon_data_table`:
+* Load the generated file into `beacon_data_table`:
   ```
   cat filename.SNPs | psql -h localhost -p 5432 -U microaccounts_dev -c "copy beacon_data_table (dataset_id,start,chromosome,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev
   ```
   NOTE: This command should be executed only in the `elixir_beacon_dev` database. The testing database will be initialized with some data when the tests are run.
 
-1. Update counts in `beacon_dataset_table`
+* Update counts in `beacon_dataset_table`
    * Get counts from database:
   ```sql
   select dataset_id, count(*) as variant_count
@@ -238,16 +238,16 @@ datasource.elixirbeacon.username=microaccounts_dev
 datasource.elixirbeacon.password=PUT HERE YOUR PASSWORD
 datasource.elixirbeacon.driverClassName=org.postgresql.Driver
 ```
-1. Specify the type of the database (postgresql), the hostname (default, 127.0.0.1), port (default, 5432) and finally the database name.
+* Specify the type of the database (postgresql), the hostname (default, 127.0.0.1), port (default, 5432) and finally the database name.
     * I. e. if you use MySQL: `jdbc:mysql`
-1. Username that will be used to connect to the database (default, microaccounts_dev).
-1. Password of that username.
-1. Driver class name 
+* Username that will be used to connect to the database (default, microaccounts_dev).
+* Password of that username.
+* Driver class name 
     * if you use MySQL: com.mysql.jdbc.Driver
   ```INI
   spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
   ```
-1. Set the Hibernate dialect.
+* Set the Hibernate dialect.
     * if you use MySQL: `org.hibernate.dialect.MySQLDialect`
  
 If you use a different DB than Postgres, you must add the corresponding library to the **/lib** folder inside the JAR (you don't need to recompile) or add the dependency to the pom.xml so maven can download the library (this will force you to compile, see next step).
