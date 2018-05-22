@@ -377,7 +377,7 @@ Returns the information about this beacon: its Id, name and description, the API
     "end" : null,
     "endMin" : 153517030,
     "endMax" : 153517050,
-    "variantType" : null,
+    "variantType" : "DEL",
     "assemblyId" : "GRCh37",
     "datasetIds" : [ "EGAD00000000028" ],
     "includeDatasetResponses" : null
@@ -391,7 +391,7 @@ Returns the information about this beacon: its Id, name and description, the API
     "end" : 146342284,
     "endMin" : null,
     "endMax" : null,
-    "variantType" : null,
+    "variantType" : "DUP",
     "assemblyId" : "GRCh37",
     "datasetIds" : [ "EGAD00000000028" ],
     "includeDatasetResponses" : null
