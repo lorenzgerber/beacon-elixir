@@ -37,6 +37,8 @@ public class SampleRequests {
   @NotNull
   private String referenceBases1;
   
+  private String variantType1;
+  
   private List<String> datasetIds1;
   
   private String alternateBases1;

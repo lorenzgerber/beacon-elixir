@@ -110,6 +110,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         .referenceName(sampleRequests.getReferenceName1())
         .referenceBases(sampleRequests.getReferenceBases1())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases1()) ? null : sampleRequests.getAlternateBases1())
+        .variantType(StringUtils.isBlank(sampleRequests.getVariantType1()) ? null : sampleRequests.getVariantType1() )
         .datasetIds(sampleRequests.getDatasetIds1().isEmpty() ? null : sampleRequests.getDatasetIds1())
         .build());
     sampleAlleleRequests.add(BeaconAlleleRequest.builder()
@@ -123,6 +124,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         .referenceName(sampleRequests.getReferenceName2())
         .referenceBases(sampleRequests.getReferenceBases2())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases2()) ? null : sampleRequests.getAlternateBases2())
+        .variantType(StringUtils.isBlank(sampleRequests.getVariantType2()) ? null : sampleRequests.getVariantType2() )
         .datasetIds(sampleRequests.getDatasetIds2().isEmpty() ? null : sampleRequests.getDatasetIds2())
         .build());
     sampleAlleleRequests.add(BeaconAlleleRequest.builder()
@@ -136,6 +138,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         .referenceBases(sampleRequests.getReferenceBases3())
         .referenceName(sampleRequests.getReferenceName3())
         .alternateBases(StringUtils.isBlank(sampleRequests.getAlternateBases3()) ? null : sampleRequests.getAlternateBases3())
+        .variantType(StringUtils.isBlank(sampleRequests.getVariantType3()) ? null : sampleRequests.getVariantType3() )
         .datasetIds(sampleRequests.getDatasetIds3().isEmpty() ? null : sampleRequests.getDatasetIds3())
         .build());
     return sampleAlleleRequests;
