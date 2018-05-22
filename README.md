@@ -440,7 +440,9 @@ querySamples:
   endMax3:
   referenceName3: X
   referenceBases3: N
-  alternateBases3:
+  alternateBases3:  
+  variantType3: DUP
+  datasetIds3: EGAD00000000028
 ```
 
 ## /beacon/query
