@@ -161,7 +161,7 @@ java -jar target/elixir-beacon-0.4.jar --spring.profiles.active=dev
   ```
 * Run this script executing:
   ```
-  ./vcf_parser.sh dataset_id < file.vcf
+  ./vcf_parser.sh dataset_id file.vcf
   ```
   This script will generate 2 output files: `dataset_id_filename.SNPs` and `dataset_id_filename.samples`.
 
