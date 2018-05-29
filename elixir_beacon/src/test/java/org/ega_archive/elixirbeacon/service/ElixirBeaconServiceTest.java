@@ -684,15 +684,15 @@ public class ElixirBeaconServiceTest {
     String datasetStableId = "EGAD00000000001";
     String variantType = VariantType.DUPLICATION.getType();
     Integer start = null;
-    Integer startMin = 22332113;
-    Integer startMax = 22332113;
+    Integer startMin = 120012493;
+    Integer startMax = 120012493;
     Integer end = null;
-    Integer endMin = 16913869;
-    Integer endMax = 16913869;
+    Integer endMin = 120012934;
+    Integer endMax = 120012934;
     List<String> datasetStableIds = Arrays.asList(datasetStableId);
     String referenceGenome = "grch37";
-    String chromosome = "1";
-    String referenceBases = "TG";
+    String chromosome = "X";
+    String referenceBases = "A";
     String alternateBases = null;
     String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
 
@@ -704,7 +704,7 @@ public class ElixirBeaconServiceTest {
     assertThat(response.isExists(), equalTo(true));
     assertThat(response.getDatasetAlleleResponses(), nullValue());
     
-    start = 22332113; 
+    start = 120012493; 
     startMin = null;
     startMax = null;
     endMin = null;
@@ -715,8 +715,72 @@ public class ElixirBeaconServiceTest {
 
     assertThat(response.isExists(), equalTo(true));
     assertThat(response.getDatasetAlleleResponses(), nullValue());
+    
+    // Range query
+    start = null; 
+    startMin = 120012490;
+    startMax = 120012493;
+    endMin = 120012930;
+    endMax = 120012938;
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
   }
 
+  @Test
+  public void queryForDELs() throws Exception {
+    String datasetStableId = "EGAD00000000001";
+    String variantType = VariantType.DELELETION.getType();
+    Integer start = null;
+    Integer startMin = 13000642;
+    Integer startMax = 13000642;
+    Integer end = null;
+    Integer endMin = 13142857;
+    Integer endMax = 13142857;
+    List<String> datasetStableIds = Arrays.asList(datasetStableId);
+    String referenceGenome = "grch37";
+    String chromosome = "1";
+    String referenceBases = "G";
+    String alternateBases = null;
+    String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
+
+    // Query with positive answer WITHOUT detailed response by dataset
+    BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+    
+    start = 13000642; 
+    startMin = null;
+    startMax = null;
+    endMin = null;
+    endMax = null;
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+    
+    // Range query
+    start = null; 
+    startMin = 13000640;
+    startMax = 13000644;
+    endMin = 13142857;
+    endMax = 13142860;
+    response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
+        alternateBases, referenceBases, chromosome, start, startMin, startMax, end, endMin, endMax,
+        referenceGenome, includeDatasetResponses);
+
+    assertThat(response.isExists(), equalTo(true));
+    assertThat(response.getDatasetAlleleResponses(), nullValue());
+  }
+  
   @Test
   public void queryMultipleDatasets() throws Exception {
     String variantType = null;
