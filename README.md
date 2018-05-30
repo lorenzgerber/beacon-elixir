@@ -1,3 +1,4 @@
+
 # Table of contents
 
 * [Requirements](https://github.com/ga4gh-beacon/beacon-elixir/blob/v0.4/README.md#requirements)
@@ -403,44 +404,43 @@ Returns the information about this beacon: its Id, name and description, the API
 ```
 The 3 examples that appear in field ` sampleAlleleRequests` can be customized by modifying the following properties in `/src/main/resources/application-{profile}.yml`:
 ```yml
-#sample #1
 querySamples:
   assemblyId1: GRCh37
   start1: 14929
-  startMin1:
-  startMax1:
-  end1:
-  endMin1:
-  endMax1:
+  startMin1: 
+  startMax1: 
+  end1: 
+  endMin1: 
+  endMax1: 
   referenceName1: 1
   referenceBases1: A
   alternateBases1: C
-  variantType1:
-  datasetIds1:
+  variantType1: 
+  datasetIds1: 
 #sample #2
   assemblyId2: GRCh37
-  start2:
+  start2: 
   startMin2: 153592310
   startMax2: 153592317
-  end2:
+  end2: 
   endMin2: 153517030
   endMax2: 153517050
   referenceName2: X
   referenceBases2: N
-  alternateBases2:
+  alternateBases2: 
   variantType2: DEL
   datasetIds2: EGAD00000000028
 #sample #3
   assemblyId3: GRCh37
   start3: 147880925
-  startMin3:
-  startMax3:
+  startMin3: 
+  startMax3: 
   end3: 146342284
-  endMin3:
-  endMax3:
+  endMin3: 
+  endMax3: 
   referenceName3: X
   referenceBases3: N
-  alternateBases3:  
+  alternateBases3: 
   variantType3: DUP
   datasetIds3: EGAD00000000028
 ```
@@ -491,18 +491,18 @@ Parameters (required in bold):
 * `includeDatasetResponses`
   Indicator of whether responses for individual datasets (`datasetAlleleResponses`) should be included in the response (`BeaconAlleleResponse`) to this request or not. If null (not specified), the default value of `NONE` is assumed.
   Accepted values : `ALL`, `HIT`, `MISS`, `NONE`.
-
-[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE))
+  
+[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=16358147&referenceBases=T&alternateBases=C&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=16358147&referenceBases=T&alternateBases=C&assemblyId=GRCh37&includeDatasetResponses=NONE)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
   "exists" : true,
   "error" : null,
   "alleleRequest" : {
-    "alternateBases" : "G",
-    "referenceBases" : "A",
+    "alternateBases" : "C",
+    "referenceBases" : "T",
     "referenceName" : "1",
-    "start" : 14929,
+    "start" : 16358147,
     "startMin" : null,
     "startMax" : null,
     "end" : null,
@@ -518,7 +518,7 @@ Parameters (required in bold):
 }
 ```
 Or you can ask for the information in a specific dataset:
-[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=X&start=147880925&end=146342284&referenceBases=N&variantType=DUP&assemblyId=GRCh7&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=X&start=147880925&end=146342284&referenceBases=N&variantType=DUP&assemblyId=GRCh7&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)
+[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=13035406&end=13379464&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&start=13035406&end=13379464&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)
 ```json
 {
   "beaconId" : "elixir-demo-beacon",
@@ -527,14 +527,14 @@ Or you can ask for the information in a specific dataset:
   "alleleRequest" : {
     "alternateBases" : null,
     "referenceBases" : "N",
-    "referenceName" : "X",
-    "start" : 147880925,
+    "referenceName" : "1",
+    "start" : 13035406,
     "startMin" : null,
     "startMax" : null,
-    "end" : 146342284,
+    "end" : 13379464,
     "endMin" : null,
     "endMax" : null,
-    "variantType" : "DUP",
+    "variantType" : "DEL",
     "assemblyId" : "GRCh37",
     "datasetIds" : [ "EGAD00000000028" ],
     "includeDatasetResponses" : "HIT"
@@ -544,9 +544,9 @@ Or you can ask for the information in a specific dataset:
     "datasetId" : "EGAD00000000028",
     "exists" : true,
     "error" : null,
-    "frequency" : 0.66,
+    "frequency" : 0.6,
     "variantCount" : 1,
-    "callCount" : 2,
+    "callCount" : 1,
     "sampleCount" : 1,
     "note" : "OK",
     "externalUrl" : null,
@@ -554,9 +554,43 @@ Or you can ask for the information in a specific dataset:
   } ]
 }
 ```
-This is an example for querying for a deletion with fuzzy match:
-[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=X&startMin=153592310&startMax=153592317&endMin=153517030&endMax=153517050&variantType=DEL&referenceBases=N&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=X&startMin=153592310&startMax=153592317&endMin=153517030&endMax=153517050&variantType=DEL&referenceBases=N&assemblyId=GRCh37&datasetIds=EGAD00000000028)
-
+This is an example for querying for a duplication with fuzzy match:
+[localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)
+```json
+{
+  "beaconId" : "elixir-demo-beacon",
+  "exists" : true,
+  "error" : null,
+  "alleleRequest" : {
+    "alternateBases" : null,
+    "referenceBases" : "N",
+    "referenceName" : "1",
+    "start" : null,
+    "startMin" : 13035404,
+    "startMax" : 13035410,
+    "end" : null,
+    "endMin" : 13379464,
+    "endMax" : 13379468,
+    "variantType" : "DEL",
+    "assemblyId" : "GRCh37",
+    "datasetIds" : [ "EGAD00000000028" ],
+    "includeDatasetResponses" : "HIT"
+  },
+  "apiVersion" : "0.4",
+  "datasetAlleleResponses" : [ {
+    "datasetId" : "EGAD00000000028",
+    "exists" : true,
+    "error" : null,
+    "frequency" : 0.6,
+    "variantCount" : 1,
+    "callCount" : 1,
+    "sampleCount" : 1,
+    "note" : "OK",
+    "externalUrl" : null,
+    "info" : null
+  } ]
+}
+```
 # Further information
 ## Project structure
 The project has the following structure:

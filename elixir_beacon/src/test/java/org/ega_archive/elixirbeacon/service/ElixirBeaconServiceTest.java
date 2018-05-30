@@ -579,7 +579,7 @@ public class ElixirBeaconServiceTest {
   public void queryForSNPs() throws Exception {
     String datasetStableId = "EGAD00000000001";
     String variantType = null;
-    Integer start = 14929;
+    Integer start = 16352491;
     Integer startMin = null;
     Integer startMax = null;
     Integer end = null;
@@ -588,8 +588,8 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = Arrays.asList(datasetStableId);
     String referenceGenome = "grch37";
     String chromosome = "1";
-    String referenceBases = "A";
-    String alternateBases = "G";
+    String referenceBases = "G";
+    String alternateBases = "A";
     String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
 
     // Query with positive answer WITHOUT detailed response by dataset
@@ -784,7 +784,7 @@ public class ElixirBeaconServiceTest {
   @Test
   public void queryMultipleDatasets() throws Exception {
     String variantType = null;
-    Integer start = 14929;
+    Integer start = 16351136;
     Integer startMin = null;
     Integer startMax = null;
     Integer end = null;
@@ -793,7 +793,7 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = Arrays.asList("EGAD00000000001", "EGAD00000000005");
     String referenceGenome = "grch37";
     String chromosome = "1";
-    String referenceBases = "A";
+    String referenceBases = "C";
     String alternateBases = "G";
     String includeDatasetResponses = FilterDatasetResponse.ALL.toString();
 
@@ -843,7 +843,7 @@ public class ElixirBeaconServiceTest {
   @Test
   public void queryAllDatasetPassingEmptyString() throws Exception {
     String variantType = null;
-    Integer start = 14929;
+    Integer start = 16352491;
     Integer startMin = null;
     Integer startMax = null;
     Integer end = null;
@@ -852,8 +852,8 @@ public class ElixirBeaconServiceTest {
     List<String> datasetStableIds = null;
     String referenceGenome = "grch37";
     String chromosome = "1";
-    String referenceBases = "A";
-    String alternateBases = "G";
+    String referenceBases = "G";
+    String alternateBases = "A";
     String includeDatasetResponses = FilterDatasetResponse.NONE.toString();
 
     BeaconAlleleResponse response = elixirBeaconService.queryBeacon(datasetStableIds, variantType,
