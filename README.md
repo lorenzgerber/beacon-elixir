@@ -555,7 +555,7 @@ Or you can ask for the information in a specific dataset:
   } ]
 }
 ```
-This is an example for querying for a duplication with fuzzy match:
+This is an example for querying for a deletion with fuzzy match:
 [localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v04/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)
 ```json
 {
