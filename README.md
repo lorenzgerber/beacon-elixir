@@ -404,45 +404,46 @@ Returns the information about this beacon: its Id, name and description, the API
 ```
 The 3 examples that appear in field ` sampleAlleleRequests` can be customized by modifying the following properties in `/src/main/resources/application-{profile}.yml`:
 ```yml
+#sample #1
 querySamples:
   assemblyId1: GRCh37
-  start1: 14929
+  start1: 16358147
   startMin1: 
   startMax1: 
   end1: 
   endMin1: 
   endMax1: 
   referenceName1: 1
-  referenceBases1: A
+  referenceBases1: T
   alternateBases1: C
   variantType1: 
   datasetIds1: 
 #sample #2
   assemblyId2: GRCh37
   start2: 
-  startMin2: 153592310
-  startMax2: 153592317
+  startMin2: 13035404
+  startMax2: 13035410
   end2: 
-  endMin2: 153517030
-  endMax2: 153517050
-  referenceName2: X
+  endMin2: 13379464
+  endMax2: 13379468
+  referenceName2: 1
   referenceBases2: N
   alternateBases2: 
   variantType2: DEL
   datasetIds2: EGAD00000000028
 #sample #3
   assemblyId3: GRCh37
-  start3: 147880925
+  start3: 120117469
   startMin3: 
   startMax3: 
-  end3: 146342284
+  end3: 120117910
   endMin3: 
   endMax3: 
   referenceName3: X
   referenceBases3: N
   alternateBases3: 
   variantType3: DUP
-  datasetIds3: EGAD00000000028
+  datasetIds3: 
 ```
 
 ## /beacon/query
