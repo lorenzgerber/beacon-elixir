@@ -58,7 +58,7 @@ psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev
 ```
 ```sql
 INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)
-  VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 74, 74, 1);
+  VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 47, 80, 1);
 ```
 ```
 wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/v0.4/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs
