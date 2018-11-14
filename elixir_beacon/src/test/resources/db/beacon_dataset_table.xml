@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<dataset>
-    <beacon_dataset_table id="EGAD00000000001" description="qwerty" access_type="PUBLIC" reference_genome="grch37" size="3"/>
-    <beacon_dataset_table id="EGAD00000000002" description="asdfg" access_type="REGISTERED" reference_genome="grch37" size="2"/>
-    <beacon_dataset_table id="EGAD00000000003" description="zxcvb" access_type="CONTROLLED" reference_genome="grch38" size="2"/>
-    <beacon_dataset_table id="EGAD00000000004" description="vbnm" access_type="PUBLIC" reference_genome="grch38" size="1"/>
-    <beacon_dataset_table id="EGAD00000000005" description="fghj" access_type="PUBLIC" reference_genome="grch37" size="4"/>
-</dataset>

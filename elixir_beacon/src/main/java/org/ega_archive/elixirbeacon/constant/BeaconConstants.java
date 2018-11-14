@@ -37,11 +37,11 @@ public class BeaconConstants {
   public static final String ORGANIZATION_CONTACT = (ApplicationContextProvider
       .getApplicationContext() != null) ? ApplicationContextProvider.getApplicationContext()
       .getEnvironment().getProperty("elixirbeacon.organization.contact")
-      : "mailto:beacon.ega@crg.eu";
+      : "mailto:sabela.delatorre@crg.eu";
 
   public static final String API =
       (ApplicationContextProvider.getApplicationContext() != null) ? ApplicationContextProvider
-          .getApplicationContext().getEnvironment().getProperty("elixirbeacon.beacon.api") : "0.3";
+          .getApplicationContext().getEnvironment().getProperty("elixirbeacon.beacon.api") : "1.0";
 
   public static final String BEACON_ID =
       (ApplicationContextProvider.getApplicationContext() != null) ? ApplicationContextProvider
