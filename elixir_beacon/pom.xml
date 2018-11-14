@@ -5,7 +5,7 @@
 
 	<groupId>org.ega_archive</groupId>
 	<artifactId>elixir-beacon</artifactId>
-	<version>0.3</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>elixir-beacon</name>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.1.12.RELEASE</version>
+		<version>1.5.4.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -22,8 +22,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>org.ega_archive.elixirbeacon.Application</start-class>
 		<java.version>1.8</java.version>
-		<hibernate.version>4.1.4.Final</hibernate.version>
-		<querydsl.version>3.4.0</querydsl.version>
+		<hibernate.version>5.1.0.Final</hibernate.version>
+		<!-- <querydsl.version>3.4.0</querydsl.version> -->
 	</properties>
 
 	<dependencies>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.ega_archive</groupId>
 			<artifactId>elixir-core</artifactId>
-			<version>beacon_api_v0.3-SNAPSHOT</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<!-- End internal dependencies -->
 
@@ -46,16 +46,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -70,7 +60,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.14.4</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -82,6 +71,12 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<!--<version>4.0.0.RELEASE</version>-->
 		</dependency>
 
 		<!-- Spring Data JPA -->
@@ -104,20 +99,17 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.3-1102-jdbc41</version>
 		</dependency>
 
 		<!-- QueryDSL -->
 		<dependency>
-			<groupId>com.mysema.querydsl</groupId>
+			<groupId>com.querydsl</groupId>
 			<artifactId>querydsl-apt</artifactId>
-			<version>${querydsl.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.mysema.querydsl</groupId>
+			<groupId>com.querydsl</groupId>
 			<artifactId>querydsl-jpa</artifactId>
-			<version>${querydsl.version}</version>
 		</dependency>
 
 		<!-- Testing -->
@@ -143,8 +135,43 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.2</version>
 		</dependency>
+		<dependency>
+	        <groupId>org.codehaus.janino</groupId>
+	        <artifactId>janino</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-joda</artifactId>
+			<version>2.9.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+			<version>2.1.1.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.5</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -178,7 +205,7 @@
 					<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
 					<verbose>false</verbose>
 					<useNativeGit>false</useNativeGit>
-					<dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+					<dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
 					<skipPoms>true</skipPoms>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
@@ -222,7 +249,7 @@
 						</goals>
 						<configuration>
 							<outputDirectory>target/generated-sources/java</outputDirectory>
-							<processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+							<processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
 						</configuration>
 					</execution>
 				</executions>
