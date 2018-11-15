@@ -61,6 +61,11 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```sql  
     INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
       VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 47, 80, 1);  
+    -- Init dataset-ConsentCodes table
+    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
+VALUES(1, 1, null, 'v1.0'); -- NRES
+    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
+VALUES(1, 6, 'pediatric research', 'v1.0'); -- RS-[XX]
     ```  
     ```  
     wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs  
@@ -78,20 +83,20 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```  
 6. Prepare dependencies  
     ```  
-    cd elixir_core  
+    cd beacon-elixir/elixir_core  
     mvn clean compile jar:jar  
-    mvn install:install-file -Dfile=/path_to_project_folder/elixir_core/target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
+    mvn install:install-file -Dfile=target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
     ```  
 7. Compile and deploy the application  
     ```  
-    cd elixir_beacon  
-    mvn clean compile package  
-    java -jar target/elixir-beacon-1.0.jar --spring.profiles.active=dev  
+    cd ../elixir_beacon  
+    mvn clean compile package -Dmaven.test.skip=true
+    java -jar target/elixir-beacon-1.0-SNAPSHOT.jar --spring.profiles.active=dev  
     ```  
 8. Go to   
     * [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
 
 # Configure databases  
 ## Create databases  
@@ -199,7 +204,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
         ```  
     * Update the row:  
         ```sql  
-        UPDATE beacon_dataset_table SET variant_cnt=74, call_cnt=126, sample_cnt=1 WHERE id=1;  
+        UPDATE beacon_dataset_table SET variant_cnt=47, call_cnt=80, sample_cnt=1 WHERE id=1;  
         ```
 
 # Managing the code  
@@ -218,11 +223,9 @@ mvn clean compile jar:jar
 This will generate the JAR file `elixir-core-1.0-SNAPSHOT.jar` inside the `/target` folder.  
 Then run:  
 ```  
-mvn install:install-file -Dfile=/path_to_project_folder/elixir_core/target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
+mvn install:install-file -Dfile=target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
 ```  
-Now this dependency will be found when compiling the main project, elixir_beacon.  
-
-NOTE: Remember to replace the `/path_to_project_folder/` part witht a valid one.  
+Now this dependency will be found when compiling the main project, elixir_beacon. 
 
 ## Elixir Beacon, the main project  
 ### Configuration files  
@@ -240,20 +243,20 @@ server.context-path=/elixirbeacon
 ```  
 As explained at the beginning, the application uses two PostgreSQL databases named `elixir_beacon_dev` and `elixir_beacon_testing`.  
 ```INI  
-datasource.elixirbeacon.url=jdbc:postgresql://127.0.0.1:5432/elixir_beacon_dev  
+datasource.elixirbeacon.url=jdbc:postgresql://localhost:5432/elixir_beacon_dev  
 datasource.elixirbeacon.username=microaccounts_dev  
 datasource.elixirbeacon.password=PUT HERE YOUR PASSWORD  
 datasource.elixirbeacon.driverClassName=org.postgresql.Driver  
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect  
 ```  
-1. Specify the **type** of the database (postgresql), the **host** (default, 127.0.0.1), **port** (default, 5432) and finally the database **name**.  
-    * I. e. if you use MySQL: `jdbc:mysql`  
+1. Specify the **type** of the database (postgresql), the **host** (default, localhost), **port** (default, 5432) and finally the database **name** (default, elixir_beacon_dev).  
+    * If you use MySQL: `jdbc:mysql`  
 2. Username that will be used to connect to the database (default, microaccounts_dev).  
 3. Password of this username.  
 4. Driver class name   
-   * if you use MySQL: `com.mysql.jdbc.Driver`  
+   * If you use MySQL: `com.mysql.jdbc.Driver`  
 5. Set the Hibernate dialect.  
-   * if you use MySQL: `org.hibernate.dialect.MySQLDialect`  
+   * If you use MySQL: `org.hibernate.dialect.MySQLDialect`  
     
 If you use a different database than Postgres, you must add the corresponding library to the **/lib** folder inside the JAR (you don't need to recompile) or add the dependency to the `pom.xml` so maven can download the library (this will require to compile, see next step).  
 
@@ -266,21 +269,20 @@ mvn clean compile package -Dspring.profiles.active="dev"
 That will also execute the tests. To skip them add `-Dmaven.test.skip=true` to the command.  
 NOTE: Tests use a different properties file located in `/src/test/resources`.  
   
-To run only the tests use:  
-
+To only run the tests use:  
 ```  
 mvn test -Dspring.profiles.active="dev"  
 ```  
-NOTE: To execute the tests you should use a different database than the main one (i. e. `elixir_beacon_testing`, see [Create databases](https://github.com/elixirhub/human-data-beacon/blob/1.0/README.md#create-databases)).  
+NOTE: For running the tests you should use a different database than the main one (e.g. `elixir_beacon_testing`, see [Create databases](https://github.com/elixirhub/human-data-beacon/blob/1.0/README.md#create-databases)) because some testing data will be loaded and overwrite anything in this database.  
   
-If compilation and test execution are successful, a JAR file will be generated in the folder `/target` with the name `elixir-beacon-1.0.jar`.  
+If compilation and test execution are successful, a JAR file will be generated in the folder `/target` with the name `elixir-beacon-1.0-SNAPSHOT.jar`.  
 
 ## Deploy the JAR  
 To deploy the JAR run run the following command within the **elixir_beacon/target** folder:  
   ```  
-java -jar target/elixir-beacon-1.0.jar --spring.profiles.active=dev  
+java -jar target/elixir-beacon-1.0-SNAPSHOT.jar --spring.profiles.active=dev  
  ```  
-It will generate a log file in `/logs/application.log` located in the same folder where the JAR has been deployed (e.g. `elixir_beacon/logs` but you can move the JAR file wherever you want and deploy it there).  
+It will generate a log file in `logs/application.log` located in the same folder where the JAR has been deployed (e.g. `elixir_beacon/logs` but you can move the JAR file wherever you want and deploy it there).  
 
 This argument `--spring.profiles.active=dev` specifies the profile to be used. By default, there are 2 profiles: `dev` and `test`. Each profile will use its own set of properties files (e.g. `dev` profile uses `application-dev.properties` and `application-dev.yml`).  
 
@@ -311,141 +313,153 @@ They are defined in the `org.ega_archive.elixirbeacon.ElixirBeaconController` cl
 Returns the information about this beacon: its Id, name and description, the API version it is compliant with, the URL where you can access this beacon, etc.  
 [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
 ```json  
-{  
-  "id" : "elixir-demo-beacon",  
-  "name" : "Elixir Demo Beacon",  
-  "apiVersion" : "0.4",  
-  "organization" : {  
-    "id" : "EGA",  
-    "name" : "European Genome-Phenome Archive (EGA)",  
-    "description" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of all types of personally identifiable genetic and phenotypic data resulting from biomedical research projects.",  
-    "address" : "",  
-    "welcomeUrl" : "https://ega-archive.org/",  
-    "contactUrl" : "mailto:beacon.ega@crg.eu",  
-    "logoUrl" : "https://ega-archive.org/images/logo.png",  
-    "info" : null  
-  },  
-  "description" : "This <a href=\"http://ga4gh.org/#/beacon\">Beacon</a> is based on the GA4GH Beacon <a href=\"https://github.com/ga4gh/schemas/blob/beacon/src/main/resources/avro/beacon.avdl\"></a>",  
-  "version" : "v1",  
-  "welcomeUrl" : "https://ega-archive.org/elixir_demo_beacon/",  
-  "alternativeUrl" : "https://ega-archive.org/elixir_demo_beacon_web/",  
-  "createDateTime" : "2015-06-01T00:00.000Z",  
-  "updateDateTime" : null,  
-  "datasets" : [ {  
-    "id" : "EGAD00000000028",  
-    "name" : null,  
-    "description" : "Sample variants",  
-    "assemblyId" : "grch37",  
-    "createDateTime" : null,  
-    "updateDateTime" : null,  
-    "dataUseConditions" : {  
-      "consentCodedataUse" : {  
-        "primaryCategory" : null,  
-        "secondaryCategories" : [ ],  
-        "requirements" : [ ],  
-        "version" : null  
-      }  
-    },  
-    "version" : null,  
-    "variantCount" : 74,  
-    "callCount" : 74,  
-    "sampleCount" : 1,  
-    "externalUrl" : null,  
-    "info" : {  
-      "accessType" : "PUBLIC",  
-      "authorized" : "true"  
-    }  
-  } ],  
-  "sampleAlleleRequests" : [ {  
-    "alternateBases" : "C",  
-    "referenceBases" : "A",  
-    "referenceName" : "1",  
-    "start" : 14929,  
-    "startMin" : null,  
-    "startMax" : null,  
-    "end" : null,  
-    "endMin" : null,  
-    "endMax" : null,  
-    "variantType" : null,  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : null,  
-    "includeDatasetResponses" : null  
-  }, {  
-    "alternateBases" : null,  
-    "referenceBases" : "N",  
-    "referenceName" : "X",  
-    "start" : null,  
-    "startMin" : 153592310,  
-    "startMax" : 153592317,  
-    "end" : null,  
-    "endMin" : 153517030,  
-    "endMax" : 153517050,  
-    "variantType" : "DEL",  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : [ "EGAD00000000028" ],  
-    "includeDatasetResponses" : null  
-  }, {  
-    "alternateBases" : null,  
-    "referenceBases" : "N",  
-    "referenceName" : "X",  
-    "start" : 147880925,  
-    "startMin" : null,  
-    "startMax" : null,  
-    "end" : 146342284,  
-    "endMin" : null,  
-    "endMax" : null,  
-    "variantType" : "DUP",  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : [ "EGAD00000000028" ],  
-    "includeDatasetResponses" : null  
-  } ],  
-  "info" : {  
-    "size" : "74"  
-  }  
-}  
+{
+  "id" : "elixir-demo-beacon",
+  "name" : "Elixir Demo Beacon",
+  "apiVersion" : "1.0",
+  "organization" : {
+    "id" : "EGA",
+    "name" : "European Genome-Phenome Archive (EGA)",
+    "description" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of all types of personally identifiable genetic and phenotypic data resulting from biomedical research projects.",
+    "address" : "",
+    "welcomeUrl" : "https://ega-archive.org/",
+    "contactUrl" : "mailto:beacon.ega@crg.eu",
+    "logoUrl" : "https://ega-archive.org/images/logo.png",
+    "info" : null
+  },
+  "description" : "This <a href=\"http://ga4gh.org/#/beacon\">Beacon</a> is based on the GA4GH Beacon <a href=\"https://github.com/ga4gh/schemas/blob/beacon/src/main/resources/avro/beacon.avdl\"></a>",
+  "version" : "v1",
+  "welcomeUrl" : "https://ega-archive.org/elixir_demo_beacon/",
+  "alternativeUrl" : "https://ega-archive.org/elixir_demo_beacon_web/",
+  "createDateTime" : "2015-06-01T00:00.000Z",
+  "updateDateTime" : "2018-11-14T00:00.000Z",
+  "datasets" : [ {
+    "id" : "EGAD00000000028",
+    "name" : null,
+    "description" : "Sample variants",
+    "assemblyId" : "grch37",
+    "createDateTime" : null,
+    "updateDateTime" : null,
+    "dataUseConditions" : {
+      "consentCodedataUse" : {
+        "primaryCategory" : {
+          "code" : "NRES",
+          "description" : "No restrictions on data use.",
+          "additionalConstraint" : null
+        },
+        "secondaryCategories" : [ {
+          "code" : "RS-[XX]",
+          "description" : "Use of the data is limited to studies of [research type] (e.g., pediatric research).",
+          "additionalConstraint" : "pediatric research"
+        } ],
+        "requirements" : [ ],
+        "version" : "v1.0"
+      }
+    },
+    "version" : null,
+    "variantCount" : 47,
+    "callCount" : 80,
+    "sampleCount" : 1,
+    "externalUrl" : null,
+    "info" : [ {
+      "key" : "accessType",
+      "value" : "PUBLIC"
+    }, {
+      "key" : "authorized",
+      "value" : "true"
+    } ]
+  } ],
+  "sampleAlleleRequests" : [ {
+    "referenceName" : "1",
+    "start" : 981930,
+    "startMin" : null,
+    "startMax" : null,
+    "end" : null,
+    "endMin" : null,
+    "endMax" : null,
+    "referenceBases" : "A",
+    "alternateBases" : "G",
+    "variantType" : null,
+    "assemblyId" : "GRCh37",
+    "datasetIds" : null,
+    "includeDatasetResponses" : null
+  }, {
+    "referenceName" : "X",
+    "start" : null,
+    "startMin" : 120093168,
+    "startMax" : 120093170,
+    "end" : null,
+    "endMin" : 120095230,
+    "endMax" : 120095235,
+    "referenceBases" : "A",
+    "alternateBases" : null,
+    "variantType" : null,
+    "assemblyId" : "GRCh37",
+    "datasetIds" : [ "EGAD00000000028" ],
+    "includeDatasetResponses" : null
+  }, {
+    "referenceName" : "1",
+    "start" : 14748940,
+    "startMin" : null,
+    "startMax" : null,
+    "end" : 1475324,
+    "endMin" : null,
+    "endMax" : null,
+    "referenceBases" : "A",
+    "alternateBases" : null,
+    "variantType" : null,
+    "assemblyId" : "GRCh37",
+    "datasetIds" : [ "EGAD00000000028" ],
+    "includeDatasetResponses" : null
+  } ],
+  "info" : [ {
+    "key" : "size",
+    "value" : "47"
+  } ]
+} 
 ```  
 The 3 examples that appear in field ` sampleAlleleRequests` can be customized by modifying the following properties in `/src/main/resources/application-{profile}.yml`:  
 ```yml  
-#sample #1  
-querySamples:  
-  assemblyId1: GRCh37  
-  start1: 16358147  
-  startMin1:   
-  startMax1:   
-  end1:   
-  endMin1:   
-  endMax1:   
-  referenceName1: 1  
-  referenceBases1: T  
-  alternateBases1: C  
-  variantType1:   
-  datasetIds1:   
-#sample #2  
-  assemblyId2: GRCh37  
-  start2:   
-  startMin2: 13035404  
-  startMax2: 13035410  
-  end2:   
-  endMin2: 13379464  
-  endMax2: 13379468  
-  referenceName2: 1  
-  referenceBases2: N  
-  alternateBases2:   
-  variantType2: DEL  
-  datasetIds2: EGAD00000000028  
-#sample #3  
-  assemblyId3: GRCh37  
-  start3: 120117469  
-  startMin3:   
-  startMax3:   
-  end3: 120117910  
-  endMin3:   
-  endMax3:   
-  referenceName3: X  
-  referenceBases3: N  
-  alternateBases3:   
-  variantType3: DUP  
-  datasetIds3:   
+#sample #1
+querySamples:
+  assemblyId1: GRCh37
+  start1: 981930
+  startMin1:
+  startMax1:
+  end1:
+  endMin1:
+  endMax1:
+  referenceName1: 1
+  referenceBases1: A
+  alternateBases1: G
+  variantType1:
+  datasetIds1:
+  #sample #2
+  assemblyId2: GRCh37
+  start2:
+  startMin2: 120093168
+  startMax2: 120093170
+  end2:
+  endMin2: 120095230
+  endMax2: 120095235
+  referenceName2: X
+  referenceBases2: A
+  alternateBases2:
+  variantType2: DUP
+  datasetIds2: EGAD00000000028
+  #sample #3
+  assemblyId3: GRCh37
+  start3: 14748940
+  startMin3:
+  startMax3:
+  end3: 1475324
+  endMin3:
+  endMax3:
+  referenceName3: 1
+  referenceBases3: A
+  alternateBases3:
+  variantType3: DEL
+  datasetIds3: EGAD00000000028
 ```  
   
 ## /beacon/query  
@@ -478,104 +492,104 @@ Parameters (required in bold):
 * `datasetIds`: Identifiers of datasets, as defined in `BeaconDataset`. If this field is null/not specified, all datasets should be queried. E.g. `?datasetIds=some-id&datasetIds=another-id`.  
 * `includeDatasetResponses`: Indicator of whether responses for individual datasets (`datasetAlleleResponses`) should be included in the response (`BeaconAlleleResponse`) to this request or not. If null (not specified), the default value of `NONE` is assumed. Accepted values : `ALL`, `HIT`, `MISS`, `NONE`.  
     
-[localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=16358147&referenceBases=T&alternateBases=C&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=16358147&referenceBases=T&alternateBases=C&assemblyId=GRCh37&includeDatasetResponses=NONE)  
+[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE)  
 ```json  
-{  
-  "beaconId" : "elixir-demo-beacon",  
-  "exists" : true,  
-  "error" : null,  
-  "alleleRequest" : {  
-    "alternateBases" : "C",  
-    "referenceBases" : "T",  
-    "referenceName" : "1",  
-    "start" : 16358147,  
-    "startMin" : null,  
-    "startMax" : null,  
-    "end" : null,  
-    "endMin" : null,  
-    "endMax" : null,  
-    "variantType" : null,  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : null,  
-    "includeDatasetResponses" : "NONE"  
-  },  
-  "apiVersion" : "0.4",  
-  "datasetAlleleResponses" : null  
-}  
+{
+  "beaconId" : "elixir-demo-beacon",
+  "exists" : true,
+  "error" : null,
+  "alleleRequest" : {
+    "referenceName" : "1",
+    "start" : 981930,
+    "startMin" : null,
+    "startMax" : null,
+    "end" : null,
+    "endMin" : null,
+    "endMax" : null,
+    "referenceBases" : "A",
+    "alternateBases" : "G",
+    "variantType" : null,
+    "assemblyId" : "GRCh37",
+    "datasetIds" : null,
+    "includeDatasetResponses" : "NONE"
+  },
+  "apiVersion" : "1.0",
+  "datasetAlleleResponses" : null
+}
 ```  
-Or you can ask for the information in a specific dataset:  
-[localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=13035406&end=13379464&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=13035406&end=13379464&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+Or you can ask for the information in a specific dataset. Example of querying a duplication with fuzzy match:
+[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=X&startMin=120093168&startMax=120093170&endMin=120095230&endMax=120095235&referenceBases=A&variantType=DUP&assemblyId=GRCh37&datasetIds=EGAD00000000028&&includeDatasetResponses=ALL](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=X&startMin=120093168&startMax=120093170&endMin=120095230&endMax=120095235&referenceBases=A&variantType=DUP&assemblyId=GRCh37&datasetIds=EGAD00000000028&&includeDatasetResponses=ALL)  
 ```json  
-{  
-  "beaconId" : "elixir-demo-beacon",  
-  "exists" : true,  
-  "error" : null,  
-  "alleleRequest" : {  
-    "alternateBases" : null,  
-    "referenceBases" : "N",  
-    "referenceName" : "1",  
-    "start" : 13035406,  
-    "startMin" : null,  
-    "startMax" : null,  
-    "end" : 13379464,  
-    "endMin" : null,  
-    "endMax" : null,  
-    "variantType" : "DEL",  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : [ "EGAD00000000028" ],  
-    "includeDatasetResponses" : "HIT"  
-  },  
-  "apiVersion" : "0.4",  
-  "datasetAlleleResponses" : [ {  
-    "datasetId" : "EGAD00000000028",  
-    "exists" : true,  
-    "error" : null,  
-    "frequency" : 0.6,  
-    "variantCount" : 1,  
-    "callCount" : 1,  
-    "sampleCount" : 1,  
-    "note" : "OK",  
-    "externalUrl" : null,  
-    "info" : null  
-  } ]  
-}  
+{
+  "beaconId" : "elixir-demo-beacon",
+  "exists" : true,
+  "error" : null,
+  "alleleRequest" : {
+    "referenceName" : "X",
+    "start" : null,
+    "startMin" : 120093168,
+    "startMax" : 120093170,
+    "end" : null,
+    "endMin" : 120095230,
+    "endMax" : 120095235,
+    "referenceBases" : "A",
+    "alternateBases" : null,
+    "variantType" : "DUP",
+    "assemblyId" : "GRCh37",
+    "datasetIds" : [ "EGAD00000000028" ],
+    "includeDatasetResponses" : "ALL"
+  },
+  "apiVersion" : "1.0",
+  "datasetAlleleResponses" : [ {
+    "datasetId" : "EGAD00000000028",
+    "exists" : true,
+    "error" : null,
+    "frequency" : 0.5,
+    "variantCount" : 1,
+    "callCount" : 1,
+    "sampleCount" : 1,
+    "note" : "OK",
+    "externalUrl" : null,
+    "info" : null
+  } ]
+}
 ```  
-This is an example for querying for a deletion with fuzzy match:  
-[localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&startMin=13035404&startMax=13035410&endMin=13379464&endMax=13379468&referenceBases=N&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+This is an example of querying a deletion with exact match:  
+[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14748940&end=1475324&referenceBases=A&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14748940&end=1475324&referenceBases=A&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
 ```json  
-{  
-  "beaconId" : "elixir-demo-beacon",  
-  "exists" : true,  
-  "error" : null,  
-  "alleleRequest" : {  
-    "alternateBases" : null,  
-    "referenceBases" : "N",  
-    "referenceName" : "1",  
-    "start" : null,  
-    "startMin" : 13035404,  
-    "startMax" : 13035410,  
-    "end" : null,  
-    "endMin" : 13379464,  
-    "endMax" : 13379468,  
-    "variantType" : "DEL",  
-    "assemblyId" : "GRCh37",  
-    "datasetIds" : [ "EGAD00000000028" ],  
-    "includeDatasetResponses" : "HIT"  
-  },  
-  "apiVersion" : "0.4",  
-  "datasetAlleleResponses" : [ {  
-    "datasetId" : "EGAD00000000028",  
-    "exists" : true,  
-    "error" : null,  
-    "frequency" : 0.6,  
-    "variantCount" : 1,  
-    "callCount" : 1,  
-    "sampleCount" : 1,  
-    "note" : "OK",  
-    "externalUrl" : null,  
-    "info" : null  
-  } ]  
-}  
+{
+  "beaconId" : "elixir-demo-beacon",
+  "exists" : true,
+  "error" : null,
+  "alleleRequest" : {
+    "referenceName" : "1",
+    "start" : 14748940,
+    "startMin" : null,
+    "startMax" : null,
+    "end" : 1475324,
+    "endMin" : null,
+    "endMax" : null,
+    "referenceBases" : "A",
+    "alternateBases" : null,
+    "variantType" : "DEL",
+    "assemblyId" : "GRCh37",
+    "datasetIds" : [ "EGAD00000000028" ],
+    "includeDatasetResponses" : "HIT"
+  },
+  "apiVersion" : "1.0",
+  "datasetAlleleResponses" : [ {
+    "datasetId" : "EGAD00000000028",
+    "exists" : true,
+    "error" : null,
+    "frequency" : 0.5,
+    "variantCount" : 1,
+    "callCount" : 1,
+    "sampleCount" : 1,
+    "note" : "OK",
+    "externalUrl" : null,
+    "info" : null
+  }]
+}
 ```  
 
 # Further information  
@@ -672,11 +686,11 @@ You can write your own implementation of the interface `ElixirBeaconService`.  T
     This will install the artifact in your local repo. After that try to compile again your custom code.  
 
 5. Execute the program with your code:   
-    * First create an empty folder an copy there the original elixir jar (`elixir-beacon-1.0.jar`)  
+    * First create an empty folder an copy there the original elixir jar (`elixir-beacon-1.0-SNAPSHOT.jar`)  
     * Then create a `/lib` folder and put the `elixir-beacon-custom-version.jar` file in that folder  
     * After that you can deploy the app running:  
         ```  
-          java -Dloader.path=lib/ -Dspring.profiles.active=dev -jar elixir-beacon-1.0.jar  
+          java -Dloader.path=lib/ -Dspring.profiles.active=dev -jar elixir-beacon-1.0-SNAPSHOT.jar 
         ```  
 
 # Docker (previous version v0.3)  
