@@ -38,60 +38,60 @@ This quick start guide uses the default configuration and sets the application u
 If you want to tune the configuration or load custom data, please, skip this section and keep reading.  
 
 1. Create 2 databases and a new user (use *r783qjkldDsiu* as password)  
-```  
-createuser -P microaccounts_dev  
-psql -h localhost -p 5432 -U postgres  
-```  
-```sql  
-CREATE DATABASE elixir_beacon_dev;  
-CREATE DATABASE elixir_beacon_testing;  
-GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_dev TO microaccounts_dev;  
-GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;  
-```  
-* Load the schema ([elixir_beacon_db_schema.sql](https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))  
-```  
-wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql  
-psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql  
-psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql  
-```  
-2. Load data ([EGAD00000000028.SNPs](https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs))  
-```  
-psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev  
-```  
-```sql  
-INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
-  VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 47, 80, 1);  
-```  
-```  
-wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs  
-cat EGAD00000000028.SNPs | psql -h localhost -p 5432 -U microaccounts_dev -c "copy beacon_data_table (dataset_id,start,chromosome,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev  
-```  
-3. Create the function ([elixir_beacon_function.sql](https://raw.githubusercontent.com/ga4gh-beacon/beacon-elixir/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_function.sql))  
-```  
-wget https://raw.githubusercontent.com/ga4gh-beacon/beacon-elixir/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_function.sql  
-psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function.sql  
-psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function.sql  
-```  
-4. Download the code  
-```  
-git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
-```  
-5. Prepare dependencies  
-```  
-cd elixir_core  
-mvn clean compile jar:jar  
-mvn install:install-file -Dfile=/path_to_project_folder/elixir_core/target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
-```  
-6. Compile and deploy the application  
-```  
-cd elixir_beacon  
-mvn clean compile package  
-java -jar target/elixir-beacon-1.0.jar --spring.profiles.active=dev  
-```  
-7. Go to   
-  * [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
-  * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)  
-  * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+    ```  
+    createuser -P microaccounts_dev  
+    psql -h localhost -p 5432 -U postgres  
+    ```  
+    ```sql  
+    CREATE DATABASE elixir_beacon_dev;  
+    CREATE DATABASE elixir_beacon_testing;  
+    GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_dev TO microaccounts_dev;  
+    GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;  
+    ```  
+2. Load the schema ([elixir_beacon_db_schema.sql](https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))  
+    ```  
+    wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql  
+    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql  
+    psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql  
+    ```  
+3. Load data ([EGAD00000000028.SNPs](https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs))  
+    ```  
+    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev  
+    ```  
+    ```sql  
+    INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
+      VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 47, 80, 1);  
+    ```  
+    ```  
+    wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs  
+    cat EGAD00000000028.SNPs | psql -h localhost -p 5432 -U microaccounts_dev -c "copy beacon_data_table (dataset_id,start,chromosome,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency) FROM STDIN USING DELIMITERS ';' CSV" elixir_beacon_dev  
+    ```  
+4. Create the function ([elixir_beacon_function.sql](https://raw.githubusercontent.com/ga4gh-beacon/beacon-elixir/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_function.sql))  
+    ```  
+    wget https://raw.githubusercontent.com/ga4gh-beacon/beacon-elixir/1.0/elixir_beacon/src/main/resources/META-INF/elixir_beacon_function.sql  
+    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function.sql  
+    psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function.sql  
+    ```  
+5. Download the code  
+    ```  
+    git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
+    ```  
+6. Prepare dependencies  
+    ```  
+    cd elixir_core  
+    mvn clean compile jar:jar  
+    mvn install:install-file -Dfile=/path_to_project_folder/elixir_core/target/elixir-core-1.0-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
+    ```  
+7. Compile and deploy the application  
+    ```  
+    cd elixir_beacon  
+    mvn clean compile package  
+    java -jar target/elixir-beacon-1.0.jar --spring.profiles.active=dev  
+    ```  
+8. Go to   
+    * [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14929&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
 
 # Configure databases  
 ## Create databases  
@@ -699,4 +699,3 @@ To detach from the docker container press <code>Ctrl + p + q</code>.
 
 # Docker UI (previous version v0.3)  
 There is a docker image with the Beacon user interface impementation available at: https://github.com/elixir-europe/human-data-beacon-ui
-
