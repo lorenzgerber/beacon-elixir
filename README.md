@@ -99,8 +99,10 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```  
     psql -h localhost -p 5432 -U postgres  
     ```  
-    NOTE: You will need a user with enough permissions to create databases.  
- 
+    Notice that: 
+    * If you want to use a different database **name**, **user** or your Postgres server is running in a different **host** or is listening to a different **port**, please, replace the values in the previous command.    
+    * You will need a user with enough permissions to create databases. 
+    
     These are the most common options used with the `psql` command:  
     * `-d`: database name (depending on the command the database name will be specified with this option).  
     * `-h`: hostname or IP of the machine where the Postgres server is running.  
@@ -113,7 +115,6 @@ If you want to tune the configuration or load custom data, please, skip this sec
     CREATE DATABASE elixir_beacon_dev;  
     CREATE DATABASE elixir_beacon_testing;  
     ```  
-    NOTE: If you want to use a different database **name**, **user** or your Postgres server is running in a different **host** or is listening to a different **port**, please, replace the values in the previous command.    
 3. Create a user that will be used by the application to connect to the databases we just created:  
     ```  
     createuser -P microaccounts_dev  
