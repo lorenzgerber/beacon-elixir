@@ -62,10 +62,8 @@ If you want to tune the configuration or load custom data, please, skip this sec
     INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
       VALUES (1, 'EGAD00000000028', 'Sample variants', 'PUBLIC', 'grch37', 47, 80, 1);  
     -- Init dataset-ConsentCodes table
-    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
-VALUES(1, 1, null, 'v1.0'); -- NRES
-    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
-VALUES(1, 6, 'pediatric research', 'v1.0'); -- RS-[XX]
+    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) VALUES(1, 1, null, 'v1.0'); -- NRES
+    INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) VALUES(1, 6, 'pediatric research', 'v1.0'); -- RS-[XX]
     ```  
     ```  
     wget https://raw.githubusercontent.com/elixirhub/human-data-beacon/1.0/elixir_beacon/src/main/resources/META-INF/EGAD00000000028.SNPs  
