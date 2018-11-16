@@ -657,20 +657,36 @@ You can write your own implementation of the interface `ElixirBeaconService`.  T
     @Component  
     public class CustomService implements ElixirBeaconService {  
      
-        public Beacon listDatasets(CommonQuery commonQuery, String referenceGenome) {  
+      @Override
+      public Beacon listDatasets(CommonQuery commonQuery, String referenceGenome) throws NotFoundException 
           //TODO: Write here your custom code  
           return null;  
-        }  
+      }  
         
-        public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {  
+      @Override
+      public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String variantType, 
+         String alternateBases, String referenceBases, String chromosome, Integer start, Integer startMin, 
+         Integer startMax, Integer end, Integer endMin, Integer endMax, String referenceGenome, 
+         String includeDatasetResponses) {  
           //TODO: Write here your custom code  
           return null;  
         }  
          
-        public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds, String alternateBases, String referenceBases, String chromosome, Integer start, String referenceGenome) {  
+      @Override
+      public List<Integer> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds,
+      VariantType type, String alternateBases, String referenceBases, String chromosome,
+      Integer start, Integer startMin, Integer startMax, Integer end, Integer endMin, Integer endMax, 
+      String referenceGenome) {  
           //TODO: Write here your custom code  
           return null;  
         }  
+      
+      @Override
+      public BeaconAlleleResponse queryBeacon(BeaconRequest request) {
+          //TODO: Write here your custom code  
+          return null;
+      }
+      
     }  
     ```  
 4. Compile your code:  
