@@ -22,7 +22,7 @@ public class ElixirBeaconController {
   @Autowired
   private ElixirBeaconService elixirBeaconService;
 
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(value = "", method = RequestMethod.GET)
   public Beacon listDatasets(
       Sort sort,
       @RequestParam(required = false) Map<String, String> params) {
