@@ -1,15 +1,17 @@
 package org.ega_archive.elixirbeacon.controller;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.SQLException;
-
 import javax.annotation.Resource;
 import javax.sql.DataSource;
-
 import org.ega_archive.elixirbeacon.Application;
 import org.ega_archive.elixirbeacon.dto.BeaconAlleleRequest;
 import org.ega_archive.elixirbeacon.dto.BeaconAlleleResponse;
@@ -32,13 +34,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class)
@@ -66,7 +61,7 @@ public class ElixirBeaconControllerTest {
     TestUtils.removeUserFromContext();
 
     // Truncate + Insert
-    TestUtils.populateDatabase(dataSource, 
+    TestUtils.populateDatabase(dataSource,
         "/db/truncate_tables.sql", 
         // Beacon
         "/db/beacon_dataset_table.sql", 

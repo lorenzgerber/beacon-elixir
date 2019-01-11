@@ -1,3 +1,18 @@
+DROP VIEW public.beacon_data_summary;
+DROP VIEW public.beacon_dataset;
+DROP VIEW public.beacon_data;
+DROP VIEW public.beacon_dataset_consent_code;
+DROP TABLE public.beacon_dataset_consent_code_table;
+DROP TABLE public.consent_code_table;
+DROP TABLE public.consent_code_category_table;
+DROP TABLE public.tmp_data_sample_table;
+DROP TABLE public.tmp_sample_table;
+DROP TABLE public.beacon_data_sample_table;
+DROP TABLE public.beacon_dataset_sample_table;
+DROP TABLE public.beacon_data_table;
+DROP TABLE public.beacon_sample_table;
+DROP TABLE public.beacon_dataset_table;
+
 CREATE TABLE public.beacon_dataset_table
 (
     id SERIAL NOT NULL PRIMARY KEY,
@@ -15,6 +30,7 @@ CREATE TABLE public.beacon_data_table (
     id SERIAL NOT NULL PRIMARY KEY,
     dataset_id integer NOT NULL REFERENCES public.beacon_dataset_table (id),
     chromosome character varying(2) NOT NULL,
+    variant_id text,
     reference text NOT NULL,
     alternate text NOT NULL,
     start integer NOT NULL,
@@ -24,8 +40,45 @@ CREATE TABLE public.beacon_data_table (
     variant_cnt integer,
     call_cnt integer,
     sample_cnt integer,
+	  matching_sample_cnt integer,
     frequency decimal
 
+);
+
+CREATE TABLE public.beacon_sample_table (
+	id serial NOT NULL PRIMARY KEY,
+	stable_id text NOT NULL
+);
+
+CREATE TABLE public.beacon_dataset_sample_table (
+	id serial NOT NULL PRIMARY KEY,
+	dataset_id int NOT NULL REFERENCES beacon_dataset_table(id),
+	sample_id int NOT NULL REFERENCES beacon_sample_table(id),
+	UNIQUE (dataset_id, sample_id)
+);
+
+CREATE TABLE public.beacon_data_sample_table (
+	data_id int NOT NULL REFERENCES beacon_data_table(id),
+	sample_id int NOT NULL REFERENCES beacon_sample_table(id),
+	PRIMARY KEY (data_id, sample_id)
+);
+
+-- Temporary table for loading data into beacon_data_sample_table
+CREATE TABLE public.tmp_data_sample_table (
+  dataset_id integer NOT NULL REFERENCES public.beacon_dataset_table (id),
+  chromosome character varying(2) NOT NULL,
+  variant_id text,
+  reference text NOT NULL,
+  alternate text NOT NULL,
+  start integer NOT NULL,
+  type character varying(10),
+  sample_ids text ARRAY[4] NOT NULL
+);
+
+CREATE TABLE tmp_sample_table (
+	sample_stable_id text NOT NULL,
+	dataset_id int NOT NULL REFERENCES beacon_dataset_table(id),
+	PRIMARY KEY(sample_stable_id, dataset_id)
 );
 
 -----------------------------------
@@ -86,38 +139,32 @@ CREATE TABLE beacon_dataset_consent_code_table (
 ---------------------------
 ---------- VIEWS ----------
 ---------------------------
-CREATE OR REPLACE VIEW beacon_data AS
-	SELECT 
-		dat.id AS dataset_id,  
-		dat.reference_genome,
-		d.id, 
-		d.chromosome, 
-		d.reference AS reference_bases, 
-		d.alternate AS alternate_bases, 
-		d.start,
-		d.end, 
-		d.type, 
-		d.sv_length, 
-		d.variant_cnt, 
-		d.call_cnt, 
-		d.sample_cnt,
-		d.frequency
-	FROM beacon_data_table d
-	INNER JOIN beacon_dataset_table dat ON dat.id=d.dataset_id
+-- DROP VIEW public.beacon_data_summary;
+CREATE OR REPLACE VIEW public.beacon_data_summary AS
+SELECT dat.id AS dataset_id,
+	d.variant_cnt,
+	d.call_cnt,
+	d.sample_cnt,
+	COALESCE(COUNT(DISTINCT d_sam.sample_id),NULL) AS matching_sample_cnt,
+	d.frequency
+FROM beacon_data_table d
+INNER JOIN beacon_dataset_table dat ON dat.id = d.dataset_id
+LEFT JOIN beacon_data_sample_table d_sam ON d_sam.data_id=d.id
+GROUP BY dat.id, d.variant_cnt, d.call_cnt, d.sample_cnt, d.frequency
 ;
 
 CREATE OR REPLACE VIEW beacon_dataset AS
-	SELECT 
-		d.id, 
-		d.stable_id, 
-		d.description, 
-		d.access_type, 
-		d.reference_genome, 
-		d.variant_cnt, 
-		d.call_cnt, 
+	SELECT
+		d.id,
+		d.stable_id,
+		d.description,
+		d.access_type,
+		d.reference_genome,
+		d.variant_cnt,
+		d.call_cnt,
 		d.sample_cnt
 	FROM beacon_dataset_table d
-	WHERE (d.access_type = ANY (ARRAY['PUBLIC', 'REGISTERED', 'CONTROLLED'])) 
+	WHERE (d.access_type = ANY (ARRAY['PUBLIC', 'REGISTERED', 'CONTROLLED']))
     AND d.variant_cnt > 0 AND d.reference_genome != '';
 ;
 

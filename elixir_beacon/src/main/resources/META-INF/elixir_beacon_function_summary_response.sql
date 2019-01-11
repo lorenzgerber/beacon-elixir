@@ -1,34 +1,24 @@
-CREATE OR REPLACE FUNCTION query_data(
-	IN _variant_type text, 
-	IN _start integer, 
-	IN _start_min integer, 
-	IN _start_max integer, 
-	IN _end integer, 
-	IN _end_min integer, 
-	IN _end_max integer,
-	IN _chromosome varchar(2), 
-	IN _reference_bases text, 
-	IN _alternate_bases text, 
-	IN _reference_genome text, 
-	IN _dataset_ids text)
-	
-RETURNS TABLE(
-	id integer,
-	dataset_id integer,
-	"start" integer,
-	chromosome character varying(2),
-	reference_bases text,
-	alternate_bases text,
-	"end" integer,
-	type character varying(10),
-	sv_length integer,
-	variant_cnt integer,
-	call_cnt integer,
-	sample_cnt integer,
-	frequency decimal,
-	reference_genome text
-) AS
-$BODY$
+-- FUNCTION: public.query_data_summary_response(text, integer, integer, integer, integer, integer, integer, character varying, text, text, text, text)
+
+-- DROP FUNCTION public.query_data_summary_response(text, integer, integer, integer, integer, integer, integer, character varying, text, text, text, text);
+
+CREATE OR REPLACE FUNCTION public.query_data_summary_response(
+	_variant_type text,
+	_start integer,
+	_start_min integer,
+	_start_max integer,
+	_end integer,
+	_end_min integer,
+	_end_max integer,
+	_chromosome character varying,
+	_reference_bases text,
+	_alternate_bases text,
+	_reference_genome text,
+	_dataset_ids text)
+    RETURNS TABLE(id text, dataset_id integer, variant_cnt integer, call_cnt integer, sample_cnt integer, frequency numeric, num_variants integer)
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
 
 DECLARE
 	_query text;
@@ -108,35 +98,64 @@ BEGIN
 	END IF;
 	IF _alternate_bases='N' THEN _alternate_bases='*'; END IF; -- Look for any variant
 
-	_query = 'SELECT DISTINCT
-		bdat.id,
-		bdat.dataset_id,
-		bdat.start,
-		bdat.chromosome,
-		bdat.reference,
-		bdat.alternate,
-		bdat.end,
-		bdat.type,
-		bdat.sv_length,
-		bdat.variant_cnt,
-		bdat.call_cnt,
-		bdat.sample_cnt,
-		bdat.frequency,
-		bdataset.reference_genome::text
-	FROM beacon_data_table bdat
-	INNER JOIN beacon_dataset_table bdataset ON bdataset.id=bdat.dataset_id
-	WHERE';
+	_query = '
+	SELECT
+		CONCAT(q.dataset_id, q.variant_cnt, q.call_cnt, q.sample_cnt, q.frequency, q.num_variants) AS id,
+		q.dataset_id,
+		q.variant_cnt,
+		q.call_cnt,
+		q.sample_cnt,
+		q.frequency,
+		q.num_variants
+	';
+	_query = _query || 'FROM (';
+
+	_query = _query || '
+	SELECT
+		variants.dataset_id,
+		variants.variant_cnt,
+		variants.call_cnt,
+		variants.sample_cnt,
+		CASE WHEN variants.num_variants > 1
+			THEN (variants.variant_cnt::decimal/variants.call_cnt)::decimal(10,10)
+			ELSE variants.frequency END AS frequency,
+		variants.num_variants
+	FROM (
+		SELECT bdat.dataset_id,
+			CASE WHEN count(*) > 1
+				THEN SUM(bdat.variant_cnt)::integer
+				ELSE max(bdat.variant_cnt) END AS variant_cnt,
+			CASE WHEN count(*) > 1
+				THEN SUM(bdat.call_cnt)::integer
+				ELSE max(bdat.call_cnt) END AS call_cnt,
+			CASE WHEN count(*) > 1
+				THEN MAX(matching_samples.sample_cnt)::integer
+				ELSE max(bdat.matching_sample_cnt) END AS sample_cnt,
+			CASE WHEN count(*) > 1
+				THEN SUM(bdat.frequency)
+				ELSE max(bdat.frequency) END AS frequency,
+			COUNT(DISTINCT bdat.id)::integer AS num_variants
+		FROM beacon_data_table bdat
+		INNER JOIN beacon_dataset_table bdataset ON bdataset.id=bdat.dataset_id
+		LEFT JOIN LATERAL (
+			SELECT COALESCE(COUNT(DISTINCT bsam.sample_id), 0)::integer AS sample_cnt
+			FROM beacon_data_sample_table bsam
+			WHERE bsam.data_id=bdat.id
+		) matching_samples ON TRUE
+		WHERE';
 	IF _variant_type IN ('DUP','DEL','INS','INV','CNV','DUP:TANDEM','DEL:ME','INS:ME') THEN
 		_query = _query || ' bdat.type=$1 AND';
 	END IF;
 
-  raise notice '_alternate_bases %', _alternate_bases;
+	raise notice '_alternate_bases: %', _alternate_bases;
+	raise notice '_dataset_ids: %', _dataset_ids;
 
 	IF _start_min IS NOT NULL THEN
 		_query = _query || ' bdat.start >= $9 AND bdat.start < $10
 						AND bdat.end >= $11	AND bdat.end < $12 AND
 	     ';
-	ELSIF _alternate_bases != '*' OR (_alternate_bases = '*' AND _end IS NULL) THEN
+	ELSIF _alternate_bases != '*' OR (_alternate_bases = '*' AND _end IS NULL)
+	    OR (_alternate_bases IS NULL AND _variant_type IS NOT NULL) THEN
 	  -- Looking for an exact match
 		_query = _query || ' bdat.start = $2 AND';
 	END IF;
@@ -145,8 +164,8 @@ BEGIN
 	  -- Remember that end is exclusive
 	  IF _alternate_bases = '*' THEN
 	     -- Looking for any variant within this range
-	    _query = _query || ' bdat.start >= $2 AND bdat.start < $8 ' ||
-	     'OR bdat.end >= $2 AND bdat.end < $8 AND
+	    _query = _query || ' (bdat.start >= $2 AND bdat.start < $8 ' ||
+	     'OR bdat.end >= $2 AND bdat.end < $8) AND
 	     ';
 	  ELSE
 	    -- Looking for an exact match
@@ -172,18 +191,25 @@ BEGIN
 		END IF;
 	END IF;
 
-	_query = _query || ' bdataset.reference_genome=$6 AND';
+	-- Convert reference_genome column to lower case
+	_query = _query || ' lower(bdataset.reference_genome)=$6 AND';
 
 	-- Datasets
 	_query = _query || ' bdat.dataset_id = ANY (string_to_array($7, '','')::int[])
-	ORDER BY bdat.dataset_id';
+			 GROUP BY bdat.dataset_id
+		) variants
+		ORDER BY variants.dataset_id
+	)q';
+
 
 	RAISE NOTICE '_query: %', _query;
-		
+
 	RETURN QUERY EXECUTE _query
 	USING _variant_type, _start, _chromosome, _reference_bases, _alternate_bases, _reference_genome, _dataset_ids, _end, _start_min, _start_max, _end_min, _end_max;
 	-- #1=_variant_type, #2=_start, #3=_chromosome, #4=_reference_bases, #5=_alternate_bases, #6=_reference_genome, #7=_dataset_ids,
 	-- #8=_end, #9=_start_min, #10=_start_max, #11=_end_min, #12=_end_max
 END
-$BODY$
-LANGUAGE plpgsql;
+$BODY$;
+
+GRANT EXECUTE ON FUNCTION public.query_data_summary_response(text, integer, integer, integer, integer, integer, integer, character varying, text, text, text, text)
+	TO microaccounts_dev;

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ega_archive.elixirbeacon.constant.BeaconConstants;
@@ -22,13 +23,13 @@ import org.ega_archive.elixirbeacon.dto.KeyValuePair;
 import org.ega_archive.elixirbeacon.enums.ErrorCode;
 import org.ega_archive.elixirbeacon.enums.FilterDatasetResponse;
 import org.ega_archive.elixirbeacon.enums.VariantType;
-import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconData;
+import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDataSummary;
 import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDataset;
 import org.ega_archive.elixirbeacon.model.elixirbeacon.BeaconDatasetConsentCode;
 import org.ega_archive.elixirbeacon.properties.SampleRequests;
-import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDataRepository;
 import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDatasetConsentCodeRepository;
 import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconDatasetRepository;
+import org.ega_archive.elixirbeacon.repository.elixirbeacon.BeaconSummaryDataRepository;
 import org.ega_archive.elixircore.enums.DatasetAccessType;
 import org.ega_archive.elixircore.helper.CommonQuery;
 import org.ega_archive.elixircore.util.StoredProcedureUtils;
@@ -39,6 +40,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   
@@ -49,7 +51,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   private BeaconDatasetRepository beaconDatasetRepository;
   
   @Autowired
-  private BeaconDataRepository beaconDataRepository;
+  private BeaconSummaryDataRepository beaconDataRepository;
   
   @Autowired
   private BeaconDatasetConsentCodeRepository beaconDatasetConsentCodeRepository;
@@ -371,22 +373,28 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
 
     long numResults = 0L;
     boolean globalExists = false;
-    
     String variantType = type != null ? type.getType() : null;
-    List<BeaconData> dataList = beaconDataRepository.searchForVariantsQuery(variantType, start,
-        startMin, startMax, end, endMin, endMax, chromosome, referenceBases, alternateBases,
-        referenceGenome, StoredProcedureUtils.joinArray(datasetIds));
+    log.debug(
+        "Calling query with params: variantType={}, start={}, startMin={}, startMax={}, end={}, "
+            + "endMin={}, endMax={}, chrom={}, reference={}, alternate={}, assemlbyId={}, "
+            + "datasetIds={}", variantType, start, startMin, startMax, end, endMin, endMax,
+        chromosome, referenceBases, alternateBases, referenceGenome, datasetIds);
+
+    List<BeaconDataSummary> dataList = beaconDataRepository
+        .searchForVariantsQuery(variantType, start,
+            startMin, startMax, end, endMin, endMax, chromosome, referenceBases, alternateBases,
+            referenceGenome, StoredProcedureUtils.joinArray(datasetIds));
     numResults = dataList.size();
     globalExists = numResults > 0;
 
-    for (BeaconData data : dataList) {
+    for (BeaconDataSummary data : dataList) {
       if (result.getAlleleRequest().getIncludeDatasetResponses() == FilterDatasetResponse.ALL
           || result.getAlleleRequest().getIncludeDatasetResponses() == FilterDatasetResponse.HIT) {
         DatasetAlleleResponse datasetResponse = new DatasetAlleleResponse();
         BeaconDataset dataset = beaconDatasetRepository.findOne(data.getDatasetId());
         datasetResponse.setDatasetId(dataset.getStableId());
         datasetResponse.setExists(true);
-        datasetResponse.setFrequency(data.getFrequency());
+        datasetResponse.setFrequency(data.getFrequency() != null ? data.getFrequency().doubleValue() : null);
         datasetResponse
             .setVariantCount(data.getVariantCnt() != null ? (long) data.getVariantCnt() : null);
         datasetResponse.setCallCount(data.getCallCnt() != null ? (long) data.getCallCnt() : null);
@@ -422,7 +430,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   private List<Integer> findAuthorizedDatasets(String referenceGenome) {
     referenceGenome = StringUtils.lowerCase(referenceGenome);
     List<Integer> publicDatasets = beaconDatasetRepository
-        .findByReferenceGenomeAndAccessType(referenceGenome, DatasetAccessType.PUBLIC.getType());
+        .findByReferenceGenomeIgnoreCaseAndAccessType(referenceGenome, DatasetAccessType.PUBLIC.getType());
     return publicDatasets;
   }
 
