@@ -5,7 +5,7 @@
 
 	<groupId>org.ega_archive</groupId>
 	<artifactId>elixir-beacon</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>elixir-beacon</name>
