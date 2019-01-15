@@ -69,19 +69,19 @@ If you want to tune the configuration or load custom data, please, skip this sec
         INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
           VALUES(1, 1, null, 'v1.0'); -- NRES - No restrictions on data use
         ```  
-   * Variants: [1_chrY_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv) and [1_chr22_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.variants.csv)
+   * Variants: [1_chrY_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv) and [1_chr21_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.variants.csv)
         ```  
         cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
             "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
-        cat 1_chr22_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+        cat 1_chr21_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
             "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
         ```  
-   * Sample list: [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv)  and [1_chr22_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.samples.csv)
+   * Sample list: [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv)  and [1_chr21_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.samples.csv)
         * Load sample list into the DB you need a temporary table, `tmp_sample_table`:
             ```  
             cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
                 "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            cat 1_chr22_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+            cat 1_chr21_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
                 "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
             ```  
         * Run this query to fill the final table `beacon_sample_table`:
@@ -102,12 +102,12 @@ If you want to tune the configuration or load custom data, please, skip this sec
             LEFT JOIN beacon_dataset_sample_table dat_sam ON dat_sam.dataset_id=dat.id AND dat_sam.sample_id=sam.id
             WHERE dat_sam.id IS NULL;
             ```
-   * Samples where each variant is found: [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)  and [1_chr22_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.variants.matching.samples.csv)
+   * Samples where each variant is found: [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)  and [1_chr21_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.variants.matching.samples.csv)
        * Load samples by variant into the DB you need a temporary table, `tmp_data_sample_table`:
             ```  
             cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
                 "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            cat 1_chr22_subset.variants.matching.samples.csv | psql -h localhost -p 5432  -U microaccounts_dev -c \
+            cat 1_chr21_subset.variants.matching.samples.csv | psql -h localhost -p 5432  -U microaccounts_dev -c \
                 "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
             ```  
         * Run this query to fill the final linking table `beacon_data_sample_table`:
