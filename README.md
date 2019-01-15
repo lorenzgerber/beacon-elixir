@@ -327,7 +327,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
 
 # Managing the code  
 ## Download the project  
-Clone the projects **elixir_beacon** (current one) and **elixir_core** located at the [Elixir's repository](https://github.com/ga4gh-beacon/beacon-elixir).  
+Clone the project located in the [Elixir's repository](https://github.com/ga4gh-beacon/beacon-elixir).  
 ```  
 git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
 ```  
