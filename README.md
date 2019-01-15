@@ -236,7 +236,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
 3. Load the dataset information into `beacon_dataset_table`:  
     ```sql  
     INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
-      VALUES (1, '1000genomes', 'Subset of variants of chromosomes 22 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 47, 80, 1);  
+      VALUES (1, '1000genomes', 'Subset of variants of chromosomes 22 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 1, 1, 1);  
     ```  
     Initialize the row setting `variant_cnt`, `call_cnt` and `sample_cnt` to 1. After loading the data, do some count and set the real values (see step 5).  
     Remember to replace the values in the previous command with the correct ones.   
