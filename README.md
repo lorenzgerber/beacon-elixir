@@ -4,6 +4,8 @@
 
 
 
+
+
 # Table of contents    
 
 * [Requirements](#requirements)  
@@ -62,21 +64,25 @@ If you want to tune the configuration or load custom data, please, skip this sec
     * Dataset:
         ```sql  
         INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
-          VALUES (1, '1000_genomes', 'Variants of chromosomes 21 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 47, 80, 1);  
+          VALUES (1, '1000genomes', 'Subset of variants of chromosomes 22 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 3119, 8513330, 2504);
         -- Init dataset-ConsentCodes table
         INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
           VALUES(1, 1, null, 'v1.0'); -- NRES - No restrictions on data use
         ```  
-   * Variants: [1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv](elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv)
+   * Variants: [1_chrY_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv) and [1_chr22_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.variants.csv)
         ```  
-        cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-        "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
+        cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+            "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
+        cat 1_chr22_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+            "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
         ```  
-   * Sample list: [1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv](elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv)  
+   * Sample list: [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv)  and [1_chr22_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.samples.csv)
         * Load sample list into the DB you need a temporary table, `tmp_sample_table`:
             ```  
-            cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-            "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
+            cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+                "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
+            cat 1_chr22_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+                "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
             ```  
         * Run this query to fill the final table `beacon_sample_table`:
             ```sql
@@ -89,18 +95,20 @@ If you want to tune the configuration or load custom data, please, skip this sec
         * Run this query to fill the final linking table `beacon_dataset_sample_table`:
             ```sql
             INSERT INTO beacon_dataset_sample_table (dataset_id, sample_id)
-            select distinct dat.id AS dataset_id, sam.id AS sample_id
-            from tmp_sample_table t
-            inner join beacon_sample_table sam ON sam.stable_id=t.sample_stable_id
-            inner join beacon_dataset_table dat ON dat.id=t.dataset_id
+            SELECT DISTINCT dat.id AS dataset_id, sam.id AS sample_id
+            FROM tmp_sample_table t
+            INNER JOIN beacon_sample_table sam ON sam.stable_id=t.sample_stable_id
+            INNER JOIN beacon_dataset_table dat ON dat.id=t.dataset_id
             LEFT JOIN beacon_dataset_sample_table dat_sam ON dat_sam.dataset_id=dat.id AND dat_sam.sample_id=sam.id
             WHERE dat_sam.id IS NULL;
             ```
-   * Samples where each variant is found: [1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv)  
+   * Samples where each variant is found: [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)  and [1_chr22_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr22_subset.variants.matching.samples.csv)
        * Load samples by variant into the DB you need a temporary table, `tmp_data_sample_table`:
             ```  
-            cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-            "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
+            cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+                "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
+            cat 1_chr22_subset.variants.matching.samples.csv | psql -h localhost -p 5432  -U microaccounts_dev -c \
+                "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
             ```  
         * Run this query to fill the final linking table `beacon_data_sample_table`:
             ```sql
@@ -127,9 +135,10 @@ If you want to tune the configuration or load custom data, please, skip this sec
     psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function_summary_response.sql  
     psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function_summary_response.sql  
     ```  
-6. Download the code  
+6. Download the code  and swith branch
     ```  
     git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
+    git checkout v1.0.1
     ```  
 7. Prepare dependencies  
     ```  
@@ -145,8 +154,8 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```  
 9. Go to   
     * [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes)  
+    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT)  
 
 # Configure databases  
 ## Create databases  
@@ -227,25 +236,25 @@ If you want to tune the configuration or load custom data, please, skip this sec
 3. Load the dataset information into `beacon_dataset_table`:  
     ```sql  
     INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
-      VALUES (1, '1000_genomes', 'Variants of chromosomes 21 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 47, 80, 1);  
+      VALUES (1, '1000genomes', 'Subset of variants of chromosomes 22 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 47, 80, 1);  
     ```  
     Initialize the row setting `variant_cnt`, `call_cnt` and `sample_cnt` to 1. After loading the data, do some count and set the real values (see step 5).  
     Remember to replace the values in the previous command with the correct ones.   
   
 4. Load the variants into `beacon_data_table`:  
-    * Download [elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv](1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv)
+    * Download [elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv](1_chrY_subset.variants.csv)
     * Load data into `beacon_data_table`:
     ```  
-    cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+    cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
     "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
     ```  
    NOTE: This command and the following ones should be executed **only** in the `elixir_beacon_dev` database. The testing database will be initialized with specific data when the tests are run.      
    
 5. Load the samples into the database:
-    * Download [1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv](elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv )
+    * Download [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv )
     * Load data into a temporary table, `tmp_sample_table`:
         ```
-        cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+        cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
         "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
         ```
     * Run this query to fill the final table `beacon_sample_table`:
@@ -271,10 +280,10 @@ If you want to tune the configuration or load custom data, please, skip this sec
         TRUNCATE TABLE tmp_sample_table;
         ```
 6. Load the samples where each variant can be found into the database:
-    * Download [1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv)
+    * Download [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)
     * Load into a temporary table, `tmp_data_sample_table`:
         ```
-        cat 1_ALL.chrY.phase3_integrated_v2a.20130502.genotypes.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
+        cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
         "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
         ```
     * Run this query to fill the final linking table `beacon_data_sample_table`:
@@ -311,7 +320,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
     * Update the dataset information:  
         ```sql  
         UPDATE beacon_dataset_table 
-        SET variant_cnt=47, call_cnt=80, sample_cnt=1 
+        SET variant_cnt=3119, call_cnt=8513330, sample_cnt=2504 
         WHERE id=1;  
         ```
 
@@ -398,7 +407,7 @@ It will generate a log file in `logs/application.log` located in the same folder
 
 This argument `--spring.profiles.active=dev` specifies the profile to be used. By default, there are 2 profiles: `dev` and `test`. Each profile will use its own set of properties files (e.g. `dev` profile uses `application-dev.properties` and `application-dev.yml`).  
 
-Using the default configuration, the application will be available at: [localhost:9075/elixirbeacon/v1/](http://localhost:9075/elixirbeacon/v1/)  
+Using the default configuration, the application will be available at: [http://localhost:9075/elixirbeacon/v1/](http://localhost:9075/elixirbeacon/v1/)  
 
 ## Run integration tests  
 We use JMeter to run this kind of tests. We have an artifact called **elixir-beacon-service-tests**.   
@@ -423,12 +432,12 @@ They are defined in the `org.ega_archive.elixirbeacon.ElixirBeaconController` cl
 
 ## /beacon/  
 Returns the information about this beacon: its Id, name and description, the API version it is compliant with, the URL where you can access this beacon, etc.  
-[localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
+[http://localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
 ```json  
 {
   "id" : "elixir-demo-beacon",
   "name" : "Elixir Demo Beacon",
-  "apiVersion" : "1.0",
+  "apiVersion" : "1.0.1",
   "organization" : {
     "id" : "EGA",
     "name" : "European Genome-Phenome Archive (EGA)",
@@ -439,17 +448,17 @@ Returns the information about this beacon: its Id, name and description, the API
     "logoUrl" : "https://ega-archive.org/images/logo.png",
     "info" : null
   },
-  "description" : "This <a href=\"http://ga4gh.org/#/beacon\">Beacon</a> is based on the GA4GH Beacon <a href=\"https://github.com/ga4gh/schemas/blob/beacon/src/main/resources/avro/beacon.avdl\"></a>",
+  "description" : "This <a href=\"https://beacon-project.io/\">Beacon</a> is based on the GA4GH Beacon <a href=\"https://github.com/ga4gh-beacon/specification/blob/v1.0.1/beacon.yaml\"></a>",
   "version" : "v1",
   "welcomeUrl" : "https://ega-archive.org/elixir_demo_beacon/",
   "alternativeUrl" : "https://ega-archive.org/elixir_demo_beacon_web/",
   "createDateTime" : "2015-06-01T00:00.000Z",
-  "updateDateTime" : "2018-11-14T00:00.000Z",
+  "updateDateTime" : "2019-01-07T00:00.000Z",
   "datasets" : [ {
-    "id" : "EGAD00000000028",
+    "id" : "1000genomes",
     "name" : null,
-    "description" : "Sample variants",
-    "assemblyId" : "grch37",
+    "description" : "Subset of variants of chromosomes 22 and Y from the 1000 genomes project",
+    "assemblyId" : "GRCh37",
     "createDateTime" : null,
     "updateDateTime" : null,
     "dataUseConditions" : {
@@ -459,19 +468,15 @@ Returns the information about this beacon: its Id, name and description, the API
           "description" : "No restrictions on data use.",
           "additionalConstraint" : null
         },
-        "secondaryCategories" : [ {
-          "code" : "RS-[XX]",
-          "description" : "Use of the data is limited to studies of [research type] (e.g., pediatric research).",
-          "additionalConstraint" : "pediatric research"
-        } ],
+        "secondaryCategories" : [ ],
         "requirements" : [ ],
         "version" : "v1.0"
       }
     },
     "version" : null,
-    "variantCount" : 47,
-    "callCount" : 80,
-    "sampleCount" : 1,
+    "variantCount" : 3119,
+    "callCount" : 8513330,
+    "sampleCount" : 2504,
     "externalUrl" : null,
     "info" : [ {
       "key" : "accessType",
@@ -482,96 +487,96 @@ Returns the information about this beacon: its Id, name and description, the API
     } ]
   } ],
   "sampleAlleleRequests" : [ {
-    "referenceName" : "1",
-    "start" : 981930,
+    "referenceName" : "Y",
+    "start" : 2655179,
     "startMin" : null,
     "startMax" : null,
     "end" : null,
     "endMin" : null,
     "endMax" : null,
-    "referenceBases" : "A",
-    "alternateBases" : "G",
+    "referenceBases" : "G",
+    "alternateBases" : "A",
     "variantType" : null,
     "assemblyId" : "GRCh37",
     "datasetIds" : null,
     "includeDatasetResponses" : null
   }, {
-    "referenceName" : "X",
+    "referenceName" : "21",
     "start" : null,
-    "startMin" : 120093168,
-    "startMax" : 120093170,
+    "startMin" : 45039444,
+    "startMax" : 45039445,
     "end" : null,
-    "endMin" : 120095230,
-    "endMax" : 120095235,
-    "referenceBases" : "A",
+    "endMin" : 45084561,
+    "endMax" : 45084562,
+    "referenceBases" : "T",
     "alternateBases" : null,
     "variantType" : null,
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00000000028" ],
+    "datasetIds" : [ "1000genomes" ],
     "includeDatasetResponses" : null
   }, {
-    "referenceName" : "1",
-    "start" : 14748940,
+    "referenceName" : "21",
+    "start" : 15399042,
     "startMin" : null,
     "startMax" : null,
-    "end" : 1475324,
+    "end" : 15419114,
     "endMin" : null,
     "endMax" : null,
-    "referenceBases" : "A",
+    "referenceBases" : "G",
     "alternateBases" : null,
     "variantType" : null,
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00000000028" ],
+    "datasetIds" : [ "1000genomes" ],
     "includeDatasetResponses" : null
   } ],
   "info" : [ {
     "key" : "size",
-    "value" : "47"
+    "value" : "3119"
   } ]
-} 
+}
 ```  
 The 3 examples that appear in field ` sampleAlleleRequests` can be customized by modifying the following properties in `/src/main/resources/application-{profile}.yml`:  
 ```yml  
-#sample #1
-querySamples:
-  assemblyId1: GRCh37
-  start1: 981930
-  startMin1:
-  startMax1:
-  end1:
-  endMin1:
-  endMax1:
-  referenceName1: 1
-  referenceBases1: A
-  alternateBases1: G
-  variantType1:
-  datasetIds1:
-  #sample #2
-  assemblyId2: GRCh37
-  start2:
-  startMin2: 120093168
-  startMax2: 120093170
-  end2:
-  endMin2: 120095230
-  endMax2: 120095235
-  referenceName2: X
-  referenceBases2: A
-  alternateBases2:
-  variantType2: DUP
-  datasetIds2: EGAD00000000028
-  #sample #3
-  assemblyId3: GRCh37
-  start3: 14748940
-  startMin3:
-  startMax3:
-  end3: 1475324
-  endMin3:
-  endMax3:
-  referenceName3: 1
-  referenceBases3: A
-  alternateBases3:
-  variantType3: DEL
-  datasetIds3: EGAD00000000028
+#sample #1  
+querySamples:  
+  assemblyId1: GRCh37  
+  start1: 2655179  
+  startMin1:   
+  startMax1:   
+  end1:   
+  endMin1:   
+  endMax1:   
+  referenceName1: Y  
+  referenceBases1: G  
+  alternateBases1: A  
+  variantType1:   
+  datasetIds1:   
+#sample #2  
+  assemblyId2: GRCh37  
+  start2:   
+  startMin2: 45039444  
+  startMax2: 45039445  
+  end2:   
+  endMin2: 45084561  
+  endMax2: 45084562  
+  referenceName2: 21  
+  referenceBases2: T  
+  alternateBases2:   
+  variantType2: DUP  
+  datasetIds2: 1000genomes  
+#sample #3   
+ assemblyId3: GRCh37  
+  start3: 15399042  
+  startMin3:   
+  startMax3:   
+  end3: 15419114  
+  endMin3:   
+  endMax3:   
+  referenceName3: 21  
+  referenceBases3: G  
+  alternateBases3:   
+  variantType3: DEL  
+  datasetIds3: 1000genomes
 ```  
   
 ## /beacon/query  
@@ -610,61 +615,61 @@ Parameters (required in bold):
 * `includeDatasetResponses`: Indicator of whether responses for individual datasets (`datasetAlleleResponses`) should be included in the response (`BeaconAlleleResponse`) to this request or not. If null (not specified), the default value of `NONE` is assumed.
     Accepted values : `ALL`, `HIT`, `MISS`, `NONE`.  
     
-[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=981930&referenceBases=A&alternateBases=G&assemblyId=GRCh37&includeDatasetResponses=NONE)  
+[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&includeDatasetResponses=NONE](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&includeDatasetResponses=NONE)  
 ```json  
 {
   "beaconId" : "elixir-demo-beacon",
   "exists" : true,
   "error" : null,
   "alleleRequest" : {
-    "referenceName" : "1",
-    "start" : 981930,
+    "referenceName" : "Y",
+    "start" : 2655179,
     "startMin" : null,
     "startMax" : null,
     "end" : null,
     "endMin" : null,
     "endMax" : null,
-    "referenceBases" : "A",
-    "alternateBases" : "G",
+    "referenceBases" : "G",
+    "alternateBases" : "A",
     "variantType" : null,
     "assemblyId" : "GRCh37",
     "datasetIds" : null,
     "includeDatasetResponses" : "NONE"
   },
-  "apiVersion" : "1.0",
+  "apiVersion" : "1.0.1",
   "datasetAlleleResponses" : null
 }
 ```  
 Or you can ask for the information in a specific dataset. Example of querying a duplication with fuzzy match:
-[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=X&startMin=120093168&startMax=120093170&endMin=120095230&endMax=120095235&referenceBases=A&variantType=DUP&assemblyId=GRCh37&datasetIds=EGAD00000000028&&includeDatasetResponses=ALL](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=X&startMin=120093168&startMax=120093170&endMin=120095230&endMax=120095235&referenceBases=A&variantType=DUP&assemblyId=GRCh37&datasetIds=EGAD00000000028&&includeDatasetResponses=ALL)  
+[http://localhost:9075/elixirbeacon/v1/beacon/query?variantType=DUP&referenceName=21&startMin=45039444&startMax=45039445&endMin=45084561&endMax=45084562&referenceBases=T&assemblyId=GRCh37&includeDatasetResponses=ALL](http://localhost:9075/elixirbeacon/v1/beacon/query?variantType=DUP&referenceName=21&startMin=45039444&startMax=45039445&endMin=45084561&endMax=45084562&referenceBases=T&assemblyId=GRCh37&includeDatasetResponses=ALL)  
 ```json  
 {
   "beaconId" : "elixir-demo-beacon",
   "exists" : true,
   "error" : null,
   "alleleRequest" : {
-    "referenceName" : "X",
+    "referenceName" : "21",
     "start" : null,
-    "startMin" : 120093168,
-    "startMax" : 120093170,
+    "startMin" : 45039444,
+    "startMax" : 45039445,
     "end" : null,
-    "endMin" : 120095230,
-    "endMax" : 120095235,
-    "referenceBases" : "A",
+    "endMin" : 45084561,
+    "endMax" : 45084562,
+    "referenceBases" : "T",
     "alternateBases" : null,
     "variantType" : "DUP",
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00000000028" ],
+    "datasetIds" : null,
     "includeDatasetResponses" : "ALL"
   },
-  "apiVersion" : "1.0",
+  "apiVersion" : "1.0.1",
   "datasetAlleleResponses" : [ {
-    "datasetId" : "EGAD00000000028",
+    "datasetId" : "1000genomes",
     "exists" : true,
     "error" : null,
-    "frequency" : 0.5,
+    "frequency" : 0.000199681,
     "variantCount" : 1,
-    "callCount" : 1,
+    "callCount" : 5008,
     "sampleCount" : 1,
     "note" : "OK",
     "externalUrl" : null,
@@ -673,40 +678,40 @@ Or you can ask for the information in a specific dataset. Example of querying a 
 }
 ```  
 This is an example of querying a deletion with exact match:  
-[http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14748940&end=1475324&referenceBases=A&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=1&start=14748940&end=1475324&referenceBases=A&variantType=DEL&assemblyId=GRCh37&datasetIds=EGAD00000000028&includeDatasetResponses=HIT)  
+[http://localhost:9075/elixirbeacon/v1/beacon/query?variantType=DEL&referenceName=21&start=15399042&end=15419114&referenceBases=T&assemblyId=GRCh37&includeDatasetResponses=ALL](http://localhost:9075/elixirbeacon/v1/beacon/query?variantType=DEL&referenceName=21&start=15399042&end=15419114&referenceBases=T&assemblyId=GRCh37&includeDatasetResponses=ALL)  
 ```json  
 {
   "beaconId" : "elixir-demo-beacon",
   "exists" : true,
   "error" : null,
   "alleleRequest" : {
-    "referenceName" : "1",
-    "start" : 14748940,
+    "referenceName" : "21",
+    "start" : 15399042,
     "startMin" : null,
     "startMax" : null,
-    "end" : 1475324,
+    "end" : 15419114,
     "endMin" : null,
     "endMax" : null,
-    "referenceBases" : "A",
+    "referenceBases" : "T",
     "alternateBases" : null,
     "variantType" : "DEL",
     "assemblyId" : "GRCh37",
-    "datasetIds" : [ "EGAD00000000028" ],
-    "includeDatasetResponses" : "HIT"
+    "datasetIds" : null,
+    "includeDatasetResponses" : "ALL"
   },
-  "apiVersion" : "1.0",
+  "apiVersion" : "1.0.1",
   "datasetAlleleResponses" : [ {
-    "datasetId" : "EGAD00000000028",
+    "datasetId" : "1000genomes",
     "exists" : true,
     "error" : null,
-    "frequency" : 0.5,
-    "variantCount" : 1,
-    "callCount" : 1,
-    "sampleCount" : 1,
+    "frequency" : 0.000399361,
+    "variantCount" : 2,
+    "callCount" : 5008,
+    "sampleCount" : 2,
     "note" : "OK",
     "externalUrl" : null,
     "info" : null
-  }]
+  } ]
 }
 ```  
 
