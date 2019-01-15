@@ -394,12 +394,10 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         BeaconDataset dataset = beaconDatasetRepository.findOne(data.getDatasetId());
         datasetResponse.setDatasetId(dataset.getStableId());
         datasetResponse.setExists(true);
-        datasetResponse.setFrequency(data.getFrequency() != null ? data.getFrequency().doubleValue() : null);
-        datasetResponse
-            .setVariantCount(data.getVariantCnt() != null ? (long) data.getVariantCnt() : null);
-        datasetResponse.setCallCount(data.getCallCnt() != null ? (long) data.getCallCnt() : null);
-        datasetResponse
-            .setSampleCount(data.getSampleCnt() != null ? (long) data.getSampleCnt() : null);
+        datasetResponse.setFrequency(data.getFrequency());
+        datasetResponse.setVariantCount(new Long(data.getVariantCnt()));
+        datasetResponse.setCallCount(new Long(data.getCallCnt()));
+        datasetResponse.setSampleCount(new Long(data.getSampleCnt()));
         result.addDatasetAlleleResponse(datasetResponse);
       }
     }
@@ -430,7 +428,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
   private List<Integer> findAuthorizedDatasets(String referenceGenome) {
     referenceGenome = StringUtils.lowerCase(referenceGenome);
     List<Integer> publicDatasets = beaconDatasetRepository
-        .findByReferenceGenomeIgnoreCaseAndAccessType(referenceGenome, DatasetAccessType.PUBLIC.getType());
+        .findReferenceGenomeAndAccessType(referenceGenome, DatasetAccessType.PUBLIC.getType());
     return publicDatasets;
   }
 

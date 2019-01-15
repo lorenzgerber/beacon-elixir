@@ -1,8 +1,10 @@
 package org.ega_archive.elixircore.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.ega_archive.elixircore.ApplicationContextProvider;
 import org.ega_archive.elixircore.event.sender.RestEventErrorHandler;
 import org.ega_archive.elixircore.interceptor.CorrelationIdInterceptor;
@@ -17,10 +19,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 @Configuration
 @Import({Cache.class, Web.class})
@@ -37,6 +35,9 @@ public class App {
     // This module serializes/deserializes DateTime values using the milliseconds form
     objectMapper.registerModule(new JodaModule());
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+    objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+
     return objectMapper;
   }
 

@@ -1,5 +1,8 @@
 package org.ega_archive.elixirbeacon.dto;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +31,7 @@ public class DatasetAlleleResponse {
   private Error error;
 
   // Frequency of this allele in the dataset. Between 0 and 1, inclusive.
-  private Double frequency;
+  private BigDecimal frequency;
 
   // Number of variants matching the allele request in the dataset.
   private Long variantCount;

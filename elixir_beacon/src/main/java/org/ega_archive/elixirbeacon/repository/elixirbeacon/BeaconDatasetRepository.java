@@ -16,11 +16,11 @@ public interface BeaconDatasetRepository extends
   
   BeaconDataset findByStableId(String stableId);
   
-  @Query("SELECT d.id FROM BeaconDataset d WHERE d.accessType=?1 ORDER BY d.id")
-  List<Integer> findByAccessType(String accessType);
+//  @Query("SELECT d.id FROM BeaconDataset d WHERE d.accessType=upper(?1) ORDER BY d.id")
+//  List<Integer> findByAccessType(String accessType);
   
-  @Query("SELECT d.id FROM BeaconDataset d WHERE d.referenceGenome=?1 AND d.accessType=?2 ORDER BY d.id")
-  List<Integer> findByReferenceGenomeIgnoreCaseAndAccessType(String referenceGenome,
+  @Query("SELECT d.id FROM BeaconDataset d WHERE lower(d.referenceGenome)=lower(?1) AND d.accessType=upper(?2) ORDER BY d.id")
+  List<Integer> findReferenceGenomeAndAccessType(String referenceGenome,
       String accessType);
 
 }
