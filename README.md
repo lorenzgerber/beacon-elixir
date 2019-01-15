@@ -829,5 +829,5 @@ You can write your own implementation of the interface `ElixirBeaconService`.  T
     * Then create a `/lib` folder and put the `elixir-beacon-custom-version.jar` file in that folder  
     * After that you can deploy the app running:  
         ```  
-    java -Dloader.path=lib/ -Dspring.profiles.active=dev -jar elixir-beacon-1.0.1-SNAPSHOT.jar 
+        java -Dloader.path=lib/ -Dspring.profiles.active=dev -jar elixir-beacon-1.0.1-SNAPSHOT.jar 
         ```  
