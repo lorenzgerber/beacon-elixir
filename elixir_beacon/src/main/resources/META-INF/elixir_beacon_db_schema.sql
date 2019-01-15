@@ -1,17 +1,16 @@
-DROP VIEW public.beacon_data_summary;
-DROP VIEW public.beacon_dataset;
-DROP VIEW public.beacon_data;
-DROP VIEW public.beacon_dataset_consent_code;
-DROP TABLE public.beacon_dataset_consent_code_table;
-DROP TABLE public.consent_code_table;
-DROP TABLE public.consent_code_category_table;
-DROP TABLE public.tmp_data_sample_table;
-DROP TABLE public.tmp_sample_table;
-DROP TABLE public.beacon_data_sample_table;
-DROP TABLE public.beacon_dataset_sample_table;
-DROP TABLE public.beacon_data_table;
-DROP TABLE public.beacon_sample_table;
-DROP TABLE public.beacon_dataset_table;
+DROP VIEW IF EXISTS public.beacon_data_summary;
+DROP VIEW IF EXISTS public.beacon_dataset;
+DROP VIEW IF EXISTS public.beacon_dataset_consent_code;
+DROP TABLE IF EXISTS public.beacon_dataset_consent_code_table CASCADE;
+DROP TABLE IF EXISTS public.consent_code_table;
+DROP TABLE IF EXISTS public.consent_code_category_table;
+DROP TABLE IF EXISTS public.tmp_data_sample_table;
+DROP TABLE IF EXISTS public.tmp_sample_table;
+DROP TABLE IF EXISTS public.beacon_data_sample_table CASCADE;
+DROP TABLE IF EXISTS public.beacon_dataset_sample_table CASCADE;
+DROP TABLE IF EXISTS public.beacon_data_table;
+DROP TABLE IF EXISTS public.beacon_sample_table;
+DROP TABLE IF EXISTS public.beacon_dataset_table;
 
 CREATE TABLE public.beacon_dataset_table
 (
@@ -76,9 +75,9 @@ CREATE TABLE public.tmp_data_sample_table (
 );
 
 CREATE TABLE tmp_sample_table (
+  id serial NOT NULL,
 	sample_stable_id text NOT NULL,
-	dataset_id int NOT NULL REFERENCES beacon_dataset_table(id),
-	PRIMARY KEY(sample_stable_id, dataset_id)
+	dataset_id int NOT NULL REFERENCES beacon_dataset_table(id)
 );
 
 -----------------------------------
