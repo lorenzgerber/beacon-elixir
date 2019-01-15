@@ -12,9 +12,10 @@ import org.springframework.data.mongodb.repository.support.QueryDslMongoReposito
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 
-import com.mysema.query.types.EntityPath;
-import com.mysema.query.types.Predicate;
-import com.mysema.query.types.path.PathBuilder;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.PathBuilder;
+
 
 public class CustomQuerydslMongoRepositoryImpl<T, ID extends Serializable>
     extends QueryDslMongoRepository<T, ID> implements CustomQuerydslMongoRepository<T, ID> {

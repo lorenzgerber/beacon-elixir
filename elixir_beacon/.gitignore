@@ -66,3 +66,5 @@ build.commit
 
 #JPA project
 persistence.xml
+
+/logs

@@ -11,7 +11,7 @@ public class DatetimeToTimestampConverter implements Converter {
   @SuppressWarnings("unchecked")
   public <T> T convert(Class<T> type, Object value) {
     if (value instanceof DateTime) {
-      return (T) new Timestamp(((org.joda.time.DateTime) value).getMillis());
+      return (T) new Timestamp(((DateTime) value).getMillis());
     }
     return null;
   }

@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import com.mysema.query.types.Predicate;
+import com.querydsl.core.types.Predicate;
+
 
 @NoRepositoryBean
 public interface CustomQuerydslJpaRepository<T, ID extends Serializable>

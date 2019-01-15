@@ -1,17 +1,18 @@
 package org.ega_archive.elixircore.filter;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.ega_archive.elixircore.constant.CoreConstants;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import lombok.extern.log4j.Log4j;
-
-@Log4j
+@Slf4j
 public class RestTokenPreAuthenticatedProcessingFilter extends
                                                        AbstractPreAuthenticatedProcessingFilter {
 
@@ -32,9 +33,9 @@ public class RestTokenPreAuthenticatedProcessingFilter extends
   }
 
   @Override
-  protected void unsuccessfulAuthentication(javax.servlet.http.HttpServletRequest request,
-                                            javax.servlet.http.HttpServletResponse response,
-                                            AuthenticationException failed) {
+  protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            AuthenticationException failed) throws IOException, ServletException {
     super.unsuccessfulAuthentication(request, response, failed);
     try {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, failed.getMessage());

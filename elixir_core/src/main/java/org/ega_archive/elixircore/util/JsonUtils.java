@@ -19,14 +19,14 @@ public class JsonUtils {
   private static Gson gson = new Gson(); 
   
   public static <T> Jackson2JsonMessageConverter jsonMessageConverter(Class<T> clazz,
-                                                                      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper) {
+    
     DefaultClassMapper classMapper = new DefaultClassMapper();
     classMapper.setDefaultType(clazz);
 
-    Jackson2JsonMessageConverter jsonMessageConverter = new Jackson2JsonMessageConverter();
+    Jackson2JsonMessageConverter jsonMessageConverter =
+        new Jackson2JsonMessageConverter(objectMapper);
     jsonMessageConverter.setClassMapper(classMapper);
-
-    jsonMessageConverter.setJsonObjectMapper(objectMapper);
 
     return jsonMessageConverter;
   }

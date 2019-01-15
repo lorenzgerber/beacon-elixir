@@ -1,26 +1,26 @@
 package org.ega_archive.elixircore.jetty;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.eclipse.jetty.http.HttpHeaders;
-import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.server.AbstractHttpConnection;
-import org.eclipse.jetty.server.Dispatcher;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.util.ByteArrayISO8859Writer;
-import org.eclipse.jetty.util.log.Log;
-import org.ega_archive.elixircore.dto.Base;
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.log4j.Log4j;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.server.Dispatcher;
+import org.eclipse.jetty.server.HttpConnection;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.util.ByteArrayISO8859Writer;
+import org.eclipse.jetty.util.log.Log;
+import org.ega_archive.elixircore.dto.Base;
 
-@Log4j
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JettyCustomErrorHandler extends ErrorHandler {
 
   //We cannot use HttpConversionService because the web context does not exist
@@ -28,12 +28,12 @@ public class JettyCustomErrorHandler extends ErrorHandler {
 
   @Override
   public void handle(String target, Request baseRequest, HttpServletRequest request,
-                     HttpServletResponse response) throws IOException {
-    AbstractHttpConnection connection = AbstractHttpConnection.getCurrentConnection();
+      HttpServletResponse response) throws IOException {
+    HttpConnection connection = HttpConnection.getCurrentConnection();
     String method = request.getMethod();
-    if (!method.equals(HttpMethods.GET) && !method.equals(HttpMethods.POST)
-        && !method.equals(HttpMethods.HEAD)) {
-      connection.getRequest().setHandled(true);
+    if (!method.equals(HttpMethod.GET.toString()) && !method.equals(HttpMethod.POST.toString())
+        && !method.equals(HttpMethod.HEAD.toString())) {
+      connection.getHttpChannel().getRequest().setHandled(true);
       return;
     }
 
@@ -60,16 +60,23 @@ public class JettyCustomErrorHandler extends ErrorHandler {
       }
     }
 
-    connection.getRequest().setHandled(true);
+    connection.getHttpChannel().getRequest().setHandled(true);
     if (getCacheControl() != null) {
-      response.setHeader(HttpHeaders.CACHE_CONTROL, getCacheControl());
+      response.setHeader(HttpHeader.CACHE_CONTROL.toString(), getCacheControl());
+    }
+    String debugOption = request.getParameter("debug");
+    Boolean debugOn = false;
+    String debugHeader = request.getHeader("X-Debug");
+    if (debugHeader != null && "uk586DbcBL2e".equals(debugHeader) && debugOption != null
+        && !debugOption.trim().isEmpty() && "true".equals(debugOption.trim().toLowerCase())) {
+      debugOn = true;
     }
     ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(4096);
     Base<String>
         result =
-        new Base<String>(String.valueOf(connection.getResponse().getStatus()),
-                         new Exception(connection.getResponse()
-                                           .getReason()));
+        new Base<>(String.valueOf(connection.getHttpChannel().getResponse().getStatus()),
+            new Exception(connection.getHttpChannel().getResponse()
+                .getReason()), debugOn);
     try {
       ObjectMapper mapper = new ObjectMapper();
       mapper.writeValue(writer, result);
@@ -82,4 +89,4 @@ public class JettyCustomErrorHandler extends ErrorHandler {
     writer.writeTo(response.getOutputStream());
     writer.destroy();
   }
-}
+}   

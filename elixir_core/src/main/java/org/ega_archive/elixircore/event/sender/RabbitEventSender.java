@@ -16,5 +16,6 @@ public interface RabbitEventSender extends EventsSender<Void, String, Message> {
    */
   public void prepareMessageAndSend(String exchange, String routingkey, ServiceMessage event);
 
-  public void prepareMessageAndSend(String exchange, String routingkey, ServiceMessage event, Integer priority);
+  public void prepareMessageAndSend(String exchange, String routingkey, ServiceMessage event,
+      Integer priority);
 }
