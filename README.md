@@ -138,11 +138,12 @@ If you want to tune the configuration or load custom data, please, skip this sec
 6. Download the code  and swith branch
     ```  
     git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
+    cd beacon-elixir
     git checkout v1.0.1
     ```  
 7. Prepare dependencies  
     ```  
-    cd beacon-elixir/elixir_core  
+    cd elixir_core  
     mvn clean compile jar:jar  
     mvn install:install-file -Dfile=target/elixir-core-1.0.1-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0.1-SNAPSHOT -Dpackaging=jar -DgeneratePom=true
     ```  
@@ -332,6 +333,7 @@ git clone https://github.com/ga4gh-beacon/beacon-elixir.git
 ```  
 Switch to this release:
 ```
+cd beacon-elixir
 git checkout v1.0.1
 ```
 
