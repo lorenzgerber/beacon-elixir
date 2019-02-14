@@ -49,6 +49,12 @@ public class ParamName {
   public static final String BEACON_REFERENCE_BASES = "referencebases";
   public static final String BEACON_CHROMOSOME = "referencename";
   public static final String BEACON_START = "start";
+  public static final String BEACON_START_MIN = "startmin";
+  public static final String BEACON_START_MAX = "startmax";
+  public static final String BEACON_END = "end";
+  public static final String BEACON_END_MIN = "endmin";
+  public static final String BEACON_END_MAX = "endmax";
+  public static final String VARIANT_TYPE = "varianttype";
   public static final String BEACON_REFERENCE_GENOME = "assemblyid";
   public static final String BEACON_INCLUDE_DATASET_RESPONSES = "includedatasetresponses";
 

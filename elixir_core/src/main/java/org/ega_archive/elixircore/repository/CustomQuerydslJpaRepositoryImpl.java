@@ -15,10 +15,11 @@ import org.springframework.data.jpa.repository.support.Querydsl;
 import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.types.EntityPath;
-import com.mysema.query.types.Predicate;
-import com.mysema.query.types.path.PathBuilder;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPQLQuery;
+
 
 public class CustomQuerydslJpaRepositoryImpl<T, ID extends Serializable>
     extends QueryDslJpaRepository<T, ID> implements CustomQuerydslJpaRepository<T, ID> {
@@ -55,9 +56,9 @@ public class CustomQuerydslJpaRepositoryImpl<T, ID extends Serializable>
       query = querydsl.applySorting(commonQuery.getSort(), query);
     }
 
-    Long total = countQuery.count();
+    Long total = countQuery.fetchCount();
     List<T> content =
-        pagination == null || total > pagination.getOffset() ? query.list(path) : Collections
+        pagination == null || total > pagination.getOffset() ? query.fetch() : Collections
             .<T>emptyList();
 
     return new PageImpl<T>(content, pagination, total);

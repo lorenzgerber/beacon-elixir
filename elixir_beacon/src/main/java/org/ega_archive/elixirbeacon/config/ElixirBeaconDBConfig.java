@@ -3,7 +3,7 @@ package org.ega_archive.elixirbeacon.config;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.ega_archive.elixircore.factory.CustomQuerydslJpaRepositoryFactoryBean;
+import org.ega_archive.elixircore.repository.CustomQuerydslJpaRepositoryImpl;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.ega_archive.elixirbeacon.repository.elixirbeacon",
     entityManagerFactoryRef = "elixirbeaconEntityManagerFactory",
     transactionManagerRef = "elixirbeaconTransactionManager",
-    repositoryFactoryBeanClass = CustomQuerydslJpaRepositoryFactoryBean.class)
+    repositoryBaseClass = CustomQuerydslJpaRepositoryImpl.class)
 @EnableTransactionManagement
 public class ElixirBeaconDBConfig {
 

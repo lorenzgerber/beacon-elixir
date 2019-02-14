@@ -1,20 +1,40 @@
-#properties
 #sample #1
 querySamples:
-  assembly-id-1: GRCh37
-  position-1: 179832996
-  reference-name-1: 1
-  alternate-bases-1: 
-  dataset-ids-1: 
-#sample #2
-  assembly-id-2: GRCh37
-  position-2: 179832996
-  reference-name-2: 1
-  alternate-bases-2: 
-  dataset-ids-2: EGAD00001000741,EGAD00001000740
-#sample #3
-  assembly-id-3: GRCh37
-  position-3: 179832996
-  reference-name-3: 1
-  alternate-bases-3: A
-  dataset-ids-3: 
+  assemblyId1: GRCh37
+  start1: 2655179
+  startMin1:
+  startMax1:
+  end1:
+  endMin1:
+  endMax1:
+  referenceName1: Y
+  referenceBases1: G
+  alternateBases1: A
+  variantType1:
+  datasetIds1:
+  #sample #2
+  assemblyId2: GRCh37
+  start2:
+  startMin2: 45039444
+  startMax2: 45039445
+  end2:
+  endMin2: 45084561
+  endMax2: 45084562
+  referenceName2: 21
+  referenceBases2: T
+  alternateBases2:
+  variantType2: DUP
+  datasetIds2: 1000genomes
+  #sample #3
+  assemblyId3: GRCh37
+  start3: 15399042
+  startMin3:
+  startMax3:
+  end3: 15419114
+  endMin3:
+  endMax3:
+  referenceName3: 21
+  referenceBases3: G
+  alternateBases3:
+  variantType3: DEL
+  datasetIds3: 1000genomes

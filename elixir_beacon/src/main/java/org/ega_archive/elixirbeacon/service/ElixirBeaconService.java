@@ -4,7 +4,11 @@ import java.util.List;
 
 import org.ega_archive.elixirbeacon.dto.Beacon;
 import org.ega_archive.elixirbeacon.dto.BeaconAlleleResponse;
+import org.ega_archive.elixirbeacon.dto.BeaconRequest;
+import org.ega_archive.elixirbeacon.enums.VariantType;
 import org.ega_archive.elixircore.helper.CommonQuery;
+
+import javassist.NotFoundException;
 
 public interface ElixirBeaconService {
 
@@ -19,29 +23,38 @@ public interface ElixirBeaconService {
    * @param commonQuery
    * @param referenceGenome
    * @return
+   * @throws NotFoundException 
    */
-  public Beacon listDatasets(CommonQuery commonQuery, String referenceGenome);
+  public Beacon listDatasets(CommonQuery commonQuery, String referenceGenome) throws NotFoundException;
 
   /**
    * Executes the query against the beacon and basically answers yes or no.
    * 
-   * @param datasetStableIds
-   * @param alternateBases
-   * @param referenceBases
-   * @param chromosome
    * @param start
+   * @param startMin
+   * @param startMax
+   * @param end
+   * @param endMin
+   * @param endMax
+   * @param chromosome
+   * @param referenceBases
+   * @param alternateBases
+   * @param datasetStableIds
    * @param referenceGenome
+   * @param includeDatasetResponses
    * @return
    */
-  public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String alternateBases,
-      String referenceBases, String chromosome, Integer start, String referenceGenome,
-      boolean includeDatasetResponses);
+  public BeaconAlleleResponse queryBeacon(List<String> datasetStableIds, String variantType,
+      String alternateBases, String referenceBases, String chromosome, Integer start,
+      Integer startMin, Integer startMax, Integer end, Integer endMin, Integer endMax,
+      String referenceGenome, String includeDatasetResponses);
 
   /**
    * Verifies that mandatory parameters are present and that all parameters are valid.
    * 
    * @param result
    * @param datasetStableIds
+   * @param type
    * @param alternateBases
    * @param referenceBases
    * @param chromosome
@@ -49,8 +62,11 @@ public interface ElixirBeaconService {
    * @param referenceGenome
    * @return
    */
-  public List<String> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds,
-      String alternateBases, String referenceBases, String chromosome, Integer start,
-      String referenceGenome);
+  public List<Integer> checkParams(BeaconAlleleResponse result, List<String> datasetStableIds,
+      VariantType type, String alternateBases, String referenceBases, String chromosome,
+      Integer start, Integer startMin, Integer startMax, Integer end, Integer endMin,
+      Integer endMax, String referenceGenome);
+
+  public BeaconAlleleResponse queryBeacon(BeaconRequest request);
 
 }
