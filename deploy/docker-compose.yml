@@ -14,7 +14,7 @@ services:
   db:
     environment:
       - POSTGRES_USER=microaccounts_dev
-      - POSTGRES_PASSWORD=r783qjkldDsiu
+      - POSTGRES_PASSWORD=testpassword
       - POSTGRES_DB=elixir_beacon_dev
       - PGDATA=/beacon-db
     hostname: beacon-db
@@ -31,13 +31,13 @@ services:
   beacon:
     depends_on:
       - db
-    image: egarchive/beacon:elixir-1.0.1
+    image: egarchive/beacon:elixir-test
     hostname: beacon
     container_name: beacon
     volumes:
-      - ./dev-1.1.0.properties:/beacon/application.properties
+      - ./dev.properties:/beacon/application-dev.properties
     ports:
-      - "9075:9075"
+      - "11111:9075"
     networks:
       - beacon-priv
       - beacon-pub
