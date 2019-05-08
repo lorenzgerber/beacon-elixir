@@ -1,0 +1,43 @@
+version: '3.2'
+
+# Use the default driver (here bridge)
+networks:
+  beacon-priv:
+  beacon-pub:
+
+# Use the default driver for volume creation
+volumes:
+  beacon-db:
+
+services:
+
+  db:
+    environment:
+      - POSTGRES_USER=microaccounts_dev
+      - POSTGRES_PASSWORD=testpassword
+      - POSTGRES_DB=elixir_beacon_dev
+      - PGDATA=/beacon-db
+    hostname: beacon-db
+    container_name: beacon-db
+    build: db
+    image: egarchive/beacon-db:latest
+    volumes:
+      - beacon-db:/beacon-db
+    ports:
+      - "5432:5432"
+    networks:
+      - beacon-priv
+
+  beacon:
+    depends_on:
+      - db
+    image: egarchive/beacon:elixir-test
+    hostname: beacon
+    container_name: beacon
+    volumes:
+      - ./dev.properties:/beacon/application-dev.properties
+    ports:
+      - "11111:9075"
+    networks:
+      - beacon-priv
+      - beacon-pub

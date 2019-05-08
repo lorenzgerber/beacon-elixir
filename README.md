@@ -1,15 +1,6 @@
-
-
-
-
-
-
-
-
 # Table of contents    
 
 * [Requirements](#requirements)  
-* [Quick start](#quick-start)  
 * [Configure databases](#configure-databases)  
   * [Create databases](#create-databases)  
   * [Load the data](#load-the-data)  
@@ -18,7 +9,7 @@
   * [Elixir Core](#elixir-core)  
   * [Elixir Beacon, the main project](#elixir-beacon-the-main-project)  
     * [Configuration files](#configuration-files)  
-   * [Compile and test the code](#compile-and-test-the-code)  
+  * [Compile and test the code](#compile-and-test-the-code)  
   * [Deploy the JAR](#deploy-the-jar)  
   * [Run integration tests](#run-integration-tests)  
 * [Using the application](#using-the-application)  
@@ -28,136 +19,13 @@
   * [Project structure](#project-structure)  
   * [Extend/Change functionality](#extendchange-functionality)  
   
-# Requirements  
+ # Requirements  
 
 * Java 8 JDK  
 * Apache Maven 3  
-* PostgreSQL Server 9.0+, or any other SQL server (i. e. MySQL)  
+* PostgreSQL Server 9.6+, or any other SQL server (i. e. MySQL)  
 * JMeter  
   
-# Quick start  
-
-This quick start guide uses the default configuration and sets the application up using some sample data. It requires a Postgres server running in the local machine and listening to the default port 5432.  
-  
-If you want to tune the configuration or load custom data, please, skip this section and keep reading.  
-
-1. Create 2 databases and a new user (use *r783qjkldDsiu* as password)  
-    ```  
-    createuser -P microaccounts_dev  
-    psql -h localhost -p 5432 -U postgres  
-    ```  
-    ```sql  
-    CREATE DATABASE elixir_beacon_dev;  
-    CREATE DATABASE elixir_beacon_testing;  
-    GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_dev TO microaccounts_dev;  
-    GRANT ALL PRIVILEGES ON DATABASE elixir_beacon_testing TO microaccounts_dev;  
-    ```  
-2. Load the schema ([elixir_beacon_db_schema.sql](elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql))  
-    ```  
-    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql  
-    psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql  
-    ```  
-3. Load data 
-    ```  
-    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev  
-    ```  
-    * Dataset:
-        ```sql  
-        INSERT INTO beacon_dataset_table(id, stable_id, description, access_type, reference_genome, variant_cnt, call_cnt, sample_cnt)  
-          VALUES (1, '1000genomes', 'Subset of variants of chromosomes 22 and Y from the 1000 genomes project', 'PUBLIC', 'GRCh37', 3119, 8513330, 2504);
-        -- Init dataset-ConsentCodes table
-        INSERT INTO beacon_dataset_consent_code_table (dataset_id, consent_code_id , additional_constraint, version) 
-          VALUES(1, 1, null, 'v1.0'); -- NRES - No restrictions on data use
-        ```  
-   * Variants: [1_chrY_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv) and [1_chr21_subset.variants.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.variants.csv)
-        ```  
-        cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-            "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
-        cat 1_chr21_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-            "copy beacon_data_table (dataset_id,chromosome,start,variant_id,reference,alternate,\"end\","type",sv_length,variant_cnt,call_cnt,sample_cnt,frequency,matching_sample_cnt) from stdin using delimiters ';' csv header" elixir_beacon_dev
-        ```  
-   * Sample list: [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv)  and [1_chr21_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.samples.csv)
-        * Load sample list into the DB you need a temporary table, `tmp_sample_table`:
-            ```  
-            cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-                "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            cat 1_chr21_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-                "copy tmp_sample_table (sample_stable_id,dataset_id) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            ```  
-        * Run this query to fill the final table `beacon_sample_table`:
-            ```sql
-            INSERT INTO beacon_sample_table (stable_id)
-            SELECT DISTINCT t.sample_stable_id
-            FROM tmp_sample_table t
-            LEFT JOIN beacon_sample_table sam ON sam.stable_id=t.sample_stable_id
-            WHERE sam.id IS NULL;
-            ```
-        * Run this query to fill the final linking table `beacon_dataset_sample_table`:
-            ```sql
-            INSERT INTO beacon_dataset_sample_table (dataset_id, sample_id)
-            SELECT DISTINCT dat.id AS dataset_id, sam.id AS sample_id
-            FROM tmp_sample_table t
-            INNER JOIN beacon_sample_table sam ON sam.stable_id=t.sample_stable_id
-            INNER JOIN beacon_dataset_table dat ON dat.id=t.dataset_id
-            LEFT JOIN beacon_dataset_sample_table dat_sam ON dat_sam.dataset_id=dat.id AND dat_sam.sample_id=sam.id
-            WHERE dat_sam.id IS NULL;
-            ```
-   * Samples where each variant is found: [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)  and [1_chr21_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chr21_subset.variants.matching.samples.csv)
-       * Load samples by variant into the DB you need a temporary table, `tmp_data_sample_table`:
-            ```  
-            cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
-                "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            cat 1_chr21_subset.variants.matching.samples.csv | psql -h localhost -p 5432  -U microaccounts_dev -c \
-                "copy tmp_data_sample_table (dataset_id,chromosome,start,variant_id,reference,alternate,"type",sample_ids) from stdin using delimiters ';' csv header" elixir_beacon_dev
-            ```  
-        * Run this query to fill the final linking table `beacon_data_sample_table`:
-            ```sql
-            INSERT INTO beacon_data_sample_table (data_id, sample_id)
-            select data_sam_unnested.data_id, s.id AS sample_id
-            from (
-                select dt.id as data_id, unnest(t.sample_ids) AS sample_stable_id
-                from tmp_data_sample_table t
-                inner join beacon_data_table dt ON dt.dataset_id=t.dataset_id and dt.chromosome=t.chromosome
-                    and dt.variant_id=t.variant_id and dt.reference=t.reference and dt.alternate=t.alternate
-                    and dt.start=t.start and dt.type=t.type 
-            )data_sam_unnested
-            inner join beacon_sample_table s on s.stable_id=data_sam_unnested.sample_stable_id
-            left join beacon_data_sample_table ds ON ds.data_id=data_sam_unnested.data_id and ds.sample_id=s.id
-            where ds.data_id is null;
-            ```
-    * Truncate temporary tables, `tmp_sample_table` and `tmp_data_sample_table`:
-        ```sql
-        TRUNCATE TABLE tmp_sample_table;
-        TRUNCATE TABLE tmp_data_sample_table;
-        ```
-5. Create the function ([elixir_beacon_function_summary_response.sql](elixir_beacon/src/main/resources/META-INF/elixir_beacon_function_summary_response.sql))  
-    ```  
-    psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function_summary_response.sql  
-    psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function_summary_response.sql  
-    ```  
-6. Download the code  and swith branch
-    ```  
-    git clone https://github.com/ga4gh-beacon/beacon-elixir.git  
-    cd beacon-elixir
-    git checkout v1.0.1
-    ```  
-7. Prepare dependencies  
-    ```  
-    cd elixir_core  
-    mvn clean compile jar:jar  
-    mvn install:install-file -Dfile=target/elixir-core-1.0.1-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0.1-SNAPSHOT -Dpackaging=jar -DgeneratePom=true
-    ```  
-8. Compile and deploy the application  
-    ```  
-    cd ../elixir_beacon  
-    mvn clean compile package -Dmaven.test.skip=true
-    java -jar target/elixir-beacon-1.0.1-SNAPSHOT.jar --spring.profiles.active=dev  
-    ```  
-9. Go to   
-    * [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes)  
-    * [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT)  
-
 # Configure databases  
 ## Create databases  
 1. Connect to the server:  
@@ -196,7 +64,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```  
     NOTE: You can skip this step and load the schema using a super user in the next step and, after that, grant privileges to a different user (this user will be used by the application to connect to the database).  
   
-5. Download the schema ([elixir_beacon_db_schema.sql](elixir_beacon/src/main/resources/META-INF/elixir_beacon_db_schema.sql)) and load it in **both** databases:   
+5. Download the schema ([elixir_beacon_db_schema.sql](deploy/db/db/db_schema.sql)) and load it in **both** databases:   
     ```  
     psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql  
     psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql  
@@ -215,7 +83,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
     ```  
     Remember to run these lines in **both** databases.  
     
-6. Load the function ([elixir_beacon_function_summary_response.sql](elixir_beacon/src/main/resources/META-INF/elixir_beacon_function_summary_response.sql)):  
+6. Load the function ([elixir_beacon_function_summary_response.sql](deploy/db/db/db_functions.sql)):  
     ```  
     psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function.sql  
     psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function.sql  
@@ -243,7 +111,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
     Remember to replace the values in the previous command with the correct ones.   
   
 4. Load the variants into `beacon_data_table`:  
-    * Download [elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.csv](1_chrY_subset.variants.csv)
+    * Download [1_chrY_subset.variants.csv](deploy/db/db/data/1_chrY_subset.variants.csv)
     * Load data into `beacon_data_table`:
     ```  
     cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
@@ -252,7 +120,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
    NOTE: This command and the following ones should be executed **only** in the `elixir_beacon_dev` database. The testing database will be initialized with specific data when the tests are run.      
    
 5. Load the samples into the database:
-    * Download [1_chrY_subset.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.samples.csv )
+    * Download [1_chrY_subset.samples.csv](deploy/db/db/data/1_chrY_subset.samples.csv )
     * Load data into a temporary table, `tmp_sample_table`:
         ```
         cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
@@ -281,7 +149,7 @@ If you want to tune the configuration or load custom data, please, skip this sec
         TRUNCATE TABLE tmp_sample_table;
         ```
 6. Load the samples where each variant can be found into the database:
-    * Download [1_chrY_subset.variants.matching.samples.csv](elixir_beacon/src/main/resources/META-INF/1000_genomes_data/1_chrY_subset.variants.matching.samples.csv)
+    * Download [1_chrY_subset.variants.matching.samples.csv](deploy/db/db/data/1_chrY_subset.variants.matching.samples.csv)
     * Load into a temporary table, `tmp_data_sample_table`:
         ```
         cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
@@ -341,12 +209,12 @@ git checkout v1.0.1
 First of all, it is necessary to compile the code of the **elixir_core** project because it is a dependency of the main project, elixir_beacon.  
 ```  
 cd elixir_core  
-mvn clean compile jar:jar  
+mvn clean compile jar:jar -Djar.finalName=elixir-core
 ```  
-This will generate the JAR file `elixir-core-1.0.1-SNAPSHOT.jar` inside the `/target` folder.  
+This will generate the JAR file `elixir-core.jar` inside the `/target` folder.  
 Then run:  
 ```  
-mvn install:install-file -Dfile=target/elixir-core-1.0.1-SNAPSHOT.jar -DgroupId=org.ega_archive -DartifactId=elixir-core -Dversion=1.0.1-SNAPSHOT -Dpackaging=jar -DgeneratePom=true  
+mvn install:install-file -Dfile=target/elixir-core.jar
 ```  
 Now this dependency will be found when compiling the main project, elixir_beacon. 
 
@@ -398,12 +266,12 @@ mvn test -Dspring.profiles.active="dev"
 ```  
 NOTE: For running the tests you should use a different database than the main one (e.g. `elixir_beacon_testing`, see [Create databases](#create-databases)) because some testing data will be loaded and overwrite anything in this database.  
   
-If compilation and test execution are successful, a JAR file will be generated in the folder `/target` with the name `elixir-beacon-1.0.1-SNAPSHOT.jar`.  
+If compilation and test execution are successful, a JAR file will be generated in the folder `/target` with the name `elixir-beacon.jar`.  
 
 ## Deploy the JAR  
 To deploy the JAR run run the following command within the **elixir_beacon/target** folder:  
   ```  
-java -jar target/elixir-beacon-1.0.1-SNAPSHOT.jar --spring.profiles.active=dev  
+java -jar target/elixir-beacon.jar --spring.profiles.active=dev  
  ```  
 It will generate a log file in `logs/application.log` located in the same folder where the JAR has been deployed (e.g. `elixir_beacon/logs` but you can move the JAR file wherever you want and deploy it there).  
 
