@@ -64,7 +64,7 @@
     ```  
     NOTE: You can skip this step and load the schema using a super user in the next step and, after that, grant privileges to a different user (this user will be used by the application to connect to the database).  
   
-5. Download the schema ([elixir_beacon_db_schema.sql](../deployment/deploy/db/db/db_schema.sql)) and load it in **both** databases:   
+5. Download the schema ([elixir_beacon_db_schema.sql](deploy/db/db/db_schema.sql)) and load it in **both** databases:   
     ```  
     psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_db_schema.sql  
     psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_db_schema.sql  
@@ -83,7 +83,7 @@
     ```  
     Remember to run these lines in **both** databases.  
     
-6. Load the function ([elixir_beacon_function_summary_response.sql](../deployment/deploy/db/db/db_functions.sql)):  
+6. Load the function ([elixir_beacon_function_summary_response.sql](deploy/db/db/db_functions.sql)):  
     ```  
     psql -h localhost -p 5432 -d elixir_beacon_dev -U microaccounts_dev < elixir_beacon_function.sql  
     psql -h localhost -p 5432 -d elixir_beacon_testing -U microaccounts_dev < elixir_beacon_function.sql  
@@ -111,7 +111,7 @@
     Remember to replace the values in the previous command with the correct ones.   
   
 4. Load the variants into `beacon_data_table`:  
-    * Download [1_chrY_subset.variants.csv](../deployment/deploy/db/db/data/1_chrY_subset.variants.csv)
+    * Download [1_chrY_subset.variants.csv](deploy/db/db/data/1_chrY_subset.variants.csv)
     * Load data into `beacon_data_table`:
     ```  
     cat 1_chrY_subset.variants.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
@@ -120,7 +120,7 @@
    NOTE: This command and the following ones should be executed **only** in the `elixir_beacon_dev` database. The testing database will be initialized with specific data when the tests are run.      
    
 5. Load the samples into the database:
-    * Download [1_chrY_subset.samples.csv](../deployment/deploy/db/db/data/1_chrY_subset.samples.csv )
+    * Download [1_chrY_subset.samples.csv](deploy/db/db/data/1_chrY_subset.samples.csv )
     * Load data into a temporary table, `tmp_sample_table`:
         ```
         cat 1_chrY_subset.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
@@ -149,7 +149,7 @@
         TRUNCATE TABLE tmp_sample_table;
         ```
 6. Load the samples where each variant can be found into the database:
-    * Download [1_chrY_subset.variants.matching.samples.csv](../deployment/deploy/db/db/data/1_chrY_subset.variants.matching.samples.csv)
+    * Download [1_chrY_subset.variants.matching.samples.csv](deploy/db/db/data/1_chrY_subset.variants.matching.samples.csv)
     * Load into a temporary table, `tmp_data_sample_table`:
         ```
         cat 1_chrY_subset.variants.matching.samples.csv | psql -h localhost -p 5432 -U microaccounts_dev -c \
