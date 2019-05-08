@@ -1,1 +1,11 @@
 language: java
+
+jdk: oraclejdk8
+
+cache:
+  directories:
+- $HOME/.m2
+
+script:
+- cd elixir_core && mvn clean compile jar:jar -Djar.finalName=elixir-core && mvn install:install-file -Dfile=target/elixir-core.jar
+- cd elixir_beacon && mvn clean verify -Dmaven.test.skip=true
