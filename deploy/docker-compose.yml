@@ -20,7 +20,7 @@ services:
     hostname: beacon-db
     container_name: beacon-db
     build: db
-    image: egarchive/beacon-db:latest
+    image: egarchive/elixir-beacon:db-latest
     volumes:
       - beacon-db:/beacon-db
     ports:
@@ -31,13 +31,14 @@ services:
   beacon:
     depends_on:
       - db
-    image: egarchive/beacon:elixir-test
+    build: ..
+    image: egarchive/elixir-beacon:latest
     hostname: beacon
     container_name: beacon
     volumes:
       - ./dev.properties:/beacon/application-dev.properties
     ports:
-      - "11111:9075"
+      - "9075:9075"
     networks:
       - beacon-priv
       - beacon-pub

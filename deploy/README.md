@@ -5,6 +5,30 @@
 
 ## Deploy with Docker
 
+We create 2 images: one for the beacon, and one for a database, preloading some test data. 
+Run the following command in the current directory:
+
+	docker-compose build db
+	docker-compose build beacon
+	
+You can now instanciate the images into 2 containers. The docker-compose file contains the settings to create the network to attach the containers to, and a volume to store the data for the database. We are ready to boot up a test system, with:
+
+	docker-compose up -d
+	
+You are now ready to query the beacon on `localhost` (port 9075). For example:  
+
+* [localhost:9075/elixirbeacon/v1/beacon/](http://localhost:9075/elixirbeacon/v1/beacon/)
+* [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes)
+* [localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT](http://localhost:9075/elixirbeacon/v1/beacon/query?referenceName=Y&start=2655179&referenceBases=G&alternateBases=A&assemblyId=GRCh37&datasetIds=1000genomes&includeDatasetResponses=HIT)
+
+
+The `-d` flag runs the containers _detached_, ie we get the prompt back. You can check the logs with:
+
+	docker-compose logs -f
+
+Tear down the system and remove the database volume, with:
+
+	docker-compose down -v
 
 ## Deploy manually
 
