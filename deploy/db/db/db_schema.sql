@@ -19,9 +19,9 @@ CREATE TABLE public.beacon_dataset_table
     description character varying(800),
     access_type character varying(10),
     reference_genome character varying(50),
-    variant_cnt integer NOT NULL,
-    call_cnt integer,
-    sample_cnt integer NOT NULL,
+    variant_cnt bigint NOT NULL,
+    call_cnt bigint,
+    sample_cnt bigint NOT NULL,
     CONSTRAINT beacon_dataset_table_access_type_check CHECK (access_type = ANY (ARRAY['PUBLIC', 'REGISTERED', 'CONTROLLED']))
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE public.beacon_data_table (
     variant_cnt integer,
     call_cnt integer,
     sample_cnt integer,
-	  matching_sample_cnt integer,
+	matching_sample_cnt integer,
     frequency decimal
 
 );
