@@ -1,18 +1,15 @@
 package org.ega_archive.elixirbeacon.dto;
 
-import java.util.List;
-import java.util.Map;
-
-import org.ega_archive.elixirbeacon.constant.BeaconConstants;
-import org.ega_archive.elixirbeacon.dto.datause.DataUseCondition;
-import org.joda.time.DateTime;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
+import java.math.BigInteger;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ega_archive.elixirbeacon.constant.BeaconConstants;
+import org.ega_archive.elixirbeacon.dto.datause.DataUseCondition;
+import org.joda.time.DateTime;
 
 @Data
 @Builder
@@ -47,13 +44,13 @@ public class Dataset {
   private String version;
 
   // Total number of variants in the dataset
-  private Long variantCount;
+  private BigInteger variantCount;
 
   // Total number of calls in the dataset
-  private Long callCount;
+  private BigInteger callCount;
 
   // Total number of samples in the dataset
-  private Long sampleCount;
+  private BigInteger sampleCount;
 
   // URL to an external system providing more dataset information (RFC 3986 format).
   private String externalUrl;

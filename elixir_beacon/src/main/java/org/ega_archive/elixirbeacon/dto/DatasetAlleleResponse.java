@@ -1,17 +1,13 @@
 package org.ega_archive.elixirbeacon.dto;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
-
-import org.ega_archive.elixircore.constant.CoreConstants;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ega_archive.elixircore.constant.CoreConstants;
 
 @Data
 @Builder
@@ -34,13 +30,13 @@ public class DatasetAlleleResponse {
   private BigDecimal frequency;
 
   // Number of variants matching the allele request in the dataset.
-  private Long variantCount;
+  private BigInteger variantCount;
 
   // Number of calls matching the allele request in the dataset.
-  private Long callCount;
+  private BigInteger callCount;
 
   // Number of samples matching the allele request in the dataset.
-  private Long sampleCount;
+  private BigInteger sampleCount;
 
   // Additional note or description of the response.
   private String note = CoreConstants.OK;

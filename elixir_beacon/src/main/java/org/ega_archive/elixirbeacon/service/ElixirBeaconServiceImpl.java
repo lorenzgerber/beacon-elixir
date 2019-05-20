@@ -1,5 +1,6 @@
 package org.ega_archive.elixirbeacon.service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -73,7 +74,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
       allDatasets = beaconDatasetRepository.findAll(commonQuery);
     }
 
-    Integer size = 0;
+    BigInteger size = BigInteger.valueOf(0L);
     for (BeaconDataset dataset : allDatasets) {
       DatasetAccessType accessType = DatasetAccessType.parse(dataset.getAccessType());
       boolean authorized = false;
@@ -85,7 +86,7 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
 
       convertedDatasets.add(Operations.convert(dataset, authorized, ccDataUseConditions));
 
-      size += dataset.getVariantCnt();
+      size = dataset.getVariantCnt().add(size);
     }
 
     List<KeyValuePair> info = new ArrayList<>();
@@ -395,9 +396,9 @@ public class ElixirBeaconServiceImpl implements ElixirBeaconService {
         datasetResponse.setDatasetId(dataset.getStableId());
         datasetResponse.setExists(true);
         datasetResponse.setFrequency(data.getFrequency());
-        datasetResponse.setVariantCount(new Long(data.getVariantCnt()));
-        datasetResponse.setCallCount(new Long(data.getCallCnt()));
-        datasetResponse.setSampleCount(new Long(data.getSampleCnt()));
+        datasetResponse.setVariantCount(data.getVariantCnt());
+        datasetResponse.setCallCount(data.getCallCnt());
+        datasetResponse.setSampleCount(data.getSampleCnt());
         result.addDatasetAlleleResponse(datasetResponse);
       }
     }

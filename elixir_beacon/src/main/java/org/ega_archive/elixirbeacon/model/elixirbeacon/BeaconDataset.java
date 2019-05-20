@@ -1,6 +1,7 @@
 package org.ega_archive.elixirbeacon.model.elixirbeacon;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import javax.persistence.*;
 
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(name="beacon_dataset")
+@Table(name="beacon_dataset", schema="public")
 @NamedQuery(name="BeaconDataset.findAll", query="SELECT b FROM BeaconDataset b")
 public class BeaconDataset implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -21,7 +22,7 @@ public class BeaconDataset implements Serializable {
 	private String accessType;
 
 	@Column(name="call_cnt")
-	private Integer callCnt;
+	private BigInteger callCnt;
 
 	private String description;
 
@@ -32,12 +33,12 @@ public class BeaconDataset implements Serializable {
 	private String referenceGenome;
 
 	@Column(name="sample_cnt")
-	private Integer sampleCnt;
+	private BigInteger sampleCnt;
 
 	@Column(name="stable_id")
 	private String stableId;
 
 	@Column(name="variant_cnt")
-	private Integer variantCnt;
+	private BigInteger variantCnt;
 
 }
