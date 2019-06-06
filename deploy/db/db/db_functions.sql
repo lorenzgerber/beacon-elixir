@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION public.query_data_summary_response(
 	_alternate_bases text,
 	_reference_genome text,
 	_dataset_ids text)
-    RETURNS TABLE(id text, dataset_id integer, variant_cnt integer, call_cnt integer, sample_cnt integer, frequency numeric, num_variants integer)
+    RETURNS TABLE(id text, dataset_id integer, variant_cnt bigint, call_cnt bigint, sample_cnt bigint, frequency numeric, num_variants integer)
     LANGUAGE 'plpgsql'
 
 AS $BODY$
@@ -123,23 +123,23 @@ BEGIN
 	FROM (
 		SELECT bdat.dataset_id,
 			CASE WHEN count(*) > 1
-				THEN SUM(bdat.variant_cnt)::integer
+				THEN SUM(bdat.variant_cnt)::bigint
 				ELSE max(bdat.variant_cnt) END AS variant_cnt,
 			CASE WHEN count(*) > 1
-				THEN SUM(bdat.call_cnt)::integer
+				THEN SUM(bdat.call_cnt)::bigint
 				ELSE max(bdat.call_cnt) END AS call_cnt,
 			CASE WHEN count(*) > 1
-				THEN MAX(matching_samples.sample_cnt)::integer
+				THEN MAX(matching_samples.sample_cnt)::bigint
 				ELSE max(bdat.matching_sample_cnt) END AS sample_cnt,
 			CASE WHEN count(*) > 1
 				THEN SUM(bdat.frequency)
 				ELSE max(bdat.frequency) END AS frequency,
 			COUNT(DISTINCT bdat.id)::integer AS num_variants
-		FROM beacon_data_table bdat
-		INNER JOIN beacon_dataset_table bdataset ON bdataset.id=bdat.dataset_id
+		FROM public.beacon_data_table bdat
+		INNER JOIN public.beacon_dataset_table bdataset ON bdataset.id=bdat.dataset_id
 		LEFT JOIN LATERAL (
 			SELECT COALESCE(COUNT(DISTINCT bsam.sample_id), 0)::integer AS sample_cnt
-			FROM beacon_data_sample_table bsam
+			FROM public.beacon_data_sample_table bsam
 			WHERE bsam.data_id=bdat.id
 		) matching_samples ON TRUE
 		WHERE';

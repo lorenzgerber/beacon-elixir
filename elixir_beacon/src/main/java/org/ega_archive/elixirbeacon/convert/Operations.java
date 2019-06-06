@@ -28,9 +28,9 @@ public class Operations {
     Dataset beaconDataset = new Dataset();
     beaconDataset.setId(dataset.getStableId());// Use the Stable Id as the ID to be used by the user
     beaconDataset.setDescription(dataset.getDescription());
-    beaconDataset.setVariantCount(new Long(dataset.getVariantCnt()));
-    beaconDataset.setCallCount(new Long(dataset.getCallCnt()));
-    beaconDataset.setSampleCount(new Long(dataset.getSampleCnt()));
+    beaconDataset.setVariantCount(dataset.getVariantCnt());
+    beaconDataset.setCallCount(dataset.getCallCnt());
+    beaconDataset.setSampleCount(dataset.getSampleCnt());
     beaconDataset.setAssemblyId(dataset.getReferenceGenome());
 
     List<KeyValuePair> info = new ArrayList<>();

@@ -1,6 +1,7 @@
 package org.ega_archive.elixirbeacon.model.elixirbeacon;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,7 +13,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "beacon_data_summary", schema = "public", catalog = "elixir_beacon_dev")
+@Table(name = "beacon_data_summary", schema = "public")
 @NamedStoredProcedureQuery(name = "querySummaryData", procedureName = "public.query_data_summary_response",
     resultClasses = {BeaconDataSummary.class}, parameters = {
     @StoredProcedureParameter(mode = ParameterMode.IN, name = "_variant_type", type = String.class),
@@ -38,13 +39,13 @@ public class BeaconDataSummary {
   private Integer datasetId;
 
   @Column(name = "variant_cnt")
-  private Integer variantCnt;
+  private BigInteger variantCnt;
 
   @Column(name = "call_cnt")
-  private Integer callCnt;
+  private BigInteger callCnt;
 
   @Column(name = "sample_cnt")
-  private Integer sampleCnt;
+  private BigInteger sampleCnt;
 
   @Column(name = "frequency")
   private BigDecimal frequency;
